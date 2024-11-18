@@ -6,9 +6,11 @@ import { useAuth } from "../../components/AuthContext";
 import { MdAdd } from "react-icons/md";
 import {
   Button,
+  Checkbox,
   DatePicker,
   Dropdown,
   Input,
+  message,
   Modal,
   Select,
   Space,
@@ -39,10 +41,21 @@ const Empresas = () => {
       ),
     },
   ];
+  // steps formulario
+  const [nowStep, setNowStep] = useState(1);
+  const handleNextSteps = () => {
+    setNowStep(nowStep + 1);
+  };
+  const handlePrevSteps = () => {
+    setNowStep(nowStep - 1);
+  };
+
   const [business, setBusiness] = useState([]);
+  const [plans, setPlans] = useState([]);
   const [filterBusiness, setFilterBusiness] = useState([]);
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [loadingCreate, setLoadingCreate] = useState(false);
+  const [selectPlans, setSelectPlans] = useState(null);
   const [empresaCreate, setEmpresaCreate] = useState({
     name: "",
     email: "",
@@ -63,13 +76,14 @@ const Empresas = () => {
     map_url: "",
     company_id: null,
   });
-  const [plancCreate, setPlanCreate] = useState({
-    plan_id: "",
-    user_id: "",
+  const [subscription, setSubscription] = useState({
+    user_id: null,
+    plan_id: null,
     start_date: "",
     end_date: "",
-    company_id: null,
+    status: "active",
   });
+
   const apiUrl = process.env.REACT_APP_API_URL;
 
   const abrirModalCreate = (e) => {
@@ -99,7 +113,46 @@ const Empresas = () => {
   };
   useEffect(() => {
     buscar_empresas();
+  }, [auth, apiUrl]);
+
+  // PLANES
+  const buscarPlans = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/plans`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      console.log(response);
+      if (response.data.status === "success") {
+        setPlans(response.data.data);
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener los planes:", error);
+    }
+  };
+
+  const handleSelectPlans = (id, e) => {
+    e.stopPropagation();
+    // Si el plan ya está seleccionado, lo deseleccionamos
+    if (selectPlans === id) {
+      setSelectPlans(null);
+      setSubscription({ ...subscription, plan_id: null });
+    } else {
+      // Si no está seleccionado, lo seleccionamos
+      setSubscription({ ...subscription, plan_id: id });
+      setSelectPlans(id);
+    }
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line
+    buscarPlans();
   }, [0]);
+
   // ESTADOS PARA LA TABLA DINAMICA
   const [itemsPerPage, setItemsPerPage] = useState(10); //items por pagina
   const [currentPage, setCurrentPage] = useState(1);
@@ -225,25 +278,40 @@ const Empresas = () => {
       return newUser;
     });
   };
+  const handleSubscriptionChange = (dates) => {
+    if (dates) {
+      setSubscription({
+        ...subscription,
+        start_date: dates[0] ? dayjs(dates[0]).format("YYYY-MM-DD") : null,
+        end_date: dates[1] ? dayjs(dates[1]).format("YYYY-MM-DD") : null,
+      });
+    } else {
+      setSubscription({ ...subscription, start_date: null, end_date: null });
+    }
+  };
   const [logoFileEmpresa, setLogoFileEmpresa] = useState("");
   const sendImageLogo = async (modelosImages) => {
     return new Promise(async (resolve, reject) => {
       const token = auth.token;
       const formData = new FormData();
 
-      formData.append("propertyName", "logosproyectos");
+      formData.append("propertyName", "logos");
 
       modelosImages.forEach((img, index) => {
         formData.append(`modelosImages[${index}]`, img.file);
       });
 
       try {
-        const response = await axios.post(`${apiUrl}/uploadimg`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.post(
+          `http://localhost/apimultimedia/api/uploadimg`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = response.data;
         resolve(data);
       } catch (error) {
@@ -253,36 +321,140 @@ const Empresas = () => {
     });
   };
 
+  const createCompany = async (newCompany) => {
+    const token = auth.token;
+
+    try {
+      const response = await axios.post(`${apiUrl}/companies`, newCompany, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      return response.data; // Simplemente devuelve los datos
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Lanza el error para que pueda ser capturado en el llamado
+    }
+  };
+  const createSede = async (newSede) => {
+    const token = auth.token;
+
+    try {
+      const response = await axios.post(`${apiUrl}/sedes`, newSede, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      return response.data; // Simplemente devuelve los datos
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Lanza el error para que pueda ser capturado en el llamado
+    }
+  };
+  const createUser = async (newUser) => {
+    const token = auth.token;
+
+    try {
+      const response = await axios.post(`${apiUrl}/newuser`, newUser, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      return response.data; // Simplemente devuelve los datos
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Lanza el error para que pueda ser capturado en el llamado
+    }
+  };
+  const createSubscription = async (newSubscription) => {
+    const token = auth.token;
+
+    try {
+      const response = await axios.post(
+        `${apiUrl}/subscriptions`,
+        newSubscription,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+      return response.data; // Simplemente devuelve los datos
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Lanza el error para que pueda ser capturado en el llamado
+    }
+  };
+
   const handleOkCreate = async () => {
-    // if (moduloCreate.name !== "" && moduloCreate.description !== "") {
-    //   setLoadingCreate(true);
-    //   const newModulo = { ...moduloCreate };
-    //   try {
-    //     const userData = await createModulo(newModulo);
-    //     console.log(userData);
-    //     if (userData.status === "success") {
-    //       setEmpresaCreate({
-    //         name: "",
-    //         description: "",
-    //       });
-    //       setIsModalOpenCreate(false);
-    //       await buscarModulos();
-    //       setLoadingCreate(false);
-    //     } else {
-    //       message.error(
-    //         "Ocurrio un error al crear el modelo, intentelo mas tarde"
-    //       );
-    //       setLoadingCreate(false);
-    //     }
-    //   } catch (error) {
-    //     message.error("Ocurrió un error durante la creación del módulo");
-    //   } finally {
-    //     setLoadingCreate(false);
-    //   }
-    // } else {
-    //   message.warning("Debe llenar todos los campos");
-    //   setLoadingCreate(false);
-    // }
+    console.log(usuarioCreate);
+    console.log(empresaCreate);
+    console.log(sedeCreate);
+    console.log(subscription);
+
+    setLoadingCreate(true);
+
+    const newUser = { ...usuarioCreate };
+    try {
+      const userData = await createUser(newUser);
+      console.log(userData);
+
+      message.success("Se ha creado al admin correctamente");
+      if (userData.status === "success") {
+        let urlLogo = "";
+        if (empresaCreate.logo !== "") {
+          const sendImagen = await sendImageLogo([{ file: logoFileEmpresa }]);
+          console.log(sendImagen);
+          urlLogo = sendImagen.modelosImages[0];
+        }
+        const newCompany = {
+          ...empresaCreate,
+          user_id: userData.data.id,
+          logo: urlLogo,
+        };
+        const companyData = await createCompany(newCompany);
+        console.log(companyData);
+        if (companyData.status === "success") {
+          message.success("Se ha creado la empresa correctamente");
+          const newSede = { ...sedeCreate, company_id: companyData.data.id };
+          const dataSede = await createSede(newSede);
+          if (dataSede.status === "success") {
+            message.success("Se ha creado la sede correctamente");
+            const newSubscription = {
+              ...subscription,
+              user_id: userData.data.id,
+            };
+            const subscriptionData = await createSubscription(newSubscription);
+            if (subscriptionData.status === "success") {
+              message.success("Se ha creado la subscripccion correctamente");
+              await buscar_empresas();
+              handleCancelCreate();
+            } else {
+              message.error("Ocurrio un error al crear la subscripccion");
+            }
+          } else {
+            message.error("Ocurrio un error al crear la empresa");
+          }
+        } else {
+          message.error("Ocurrio un error al crear la empresa");
+        }
+      } else {
+        message.error("Ocurrio un error al crear el usuario");
+        setLoadingCreate(false);
+      }
+    } catch (error) {
+      message.error("Ocurrió un error durante la creación del cliente");
+    } finally {
+      setLoadingCreate(false);
+    }
   };
   const handleCancelCreate = () => {
     setEmpresaCreate({
@@ -293,6 +465,7 @@ const Empresas = () => {
       phone_contact: "",
       user_id: null,
     });
+    setLogoFileEmpresa("");
     setUsuarioCreate({
       name: "",
       email: "",
@@ -305,6 +478,14 @@ const Empresas = () => {
       map_url: "",
       company_id: null,
     });
+    setSubscription({
+      user_id: null,
+      plan_id: null,
+      start_date: "",
+      end_date: "",
+      status: "active",
+    });
+    setSelectPlans(null);
     setIsModalOpenCreate(false);
   };
   const handleEliminarBusiness = async (id) => {
@@ -556,171 +737,316 @@ const Empresas = () => {
               Loading
             </div>
           ) : null}
-          <h1 className="font-bold text-lg mb-2">Datos Empresa</h1>
-          <div className="bg-gray-400 h-[2px] w-full mb-4"></div>
-          <div>
-            <LogoUpload
-              setLogoFile={setLogoFileEmpresa}
-              logo={empresaCreate.logo}
-              setLogo={(logo) =>
-                setEmpresaCreate({ ...empresaCreate, logo: logo })
-              }
-            />
+          <div className="w-full mb-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="w-full flex flex-col items-center">
+                <span
+                  className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
+                    nowStep >= 1
+                      ? "bg-dark-purple text-white"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  1
+                </span>
+                <span>Datos de Empresa</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-full flex items-center">
+                  <div
+                    className={`w-full h-[2px] rounded-full ${
+                      nowStep >= 2 ? "bg-dark-purple" : "bg-gray-200"
+                    }`}
+                  ></div>
+                  <div className="w-full flex flex-col items-center">
+                    <span
+                      className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
+                        nowStep >= 2
+                          ? "bg-dark-purple text-white"
+                          : "bg-gray-200 text-gray-800"
+                      }`}
+                    >
+                      2
+                    </span>
+                  </div>
+                  <div
+                    className={`w-full h-[2px] rounded-full ${
+                      nowStep >= 2 ? "bg-dark-purple" : "bg-gray-200"
+                    }`}
+                  ></div>
+                </div>
+                <span>Registrar Usuario</span>
+              </div>
+              <div className="w-full flex flex-col items-center">
+                <span
+                  className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
+                    nowStep === 3
+                      ? "bg-dark-purple text-white"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  3
+                </span>
+                <span>Selecciona el plan</span>
+              </div>
+            </div>
           </div>
+          {nowStep === 1 ? (
+            <>
+              <div>
+                <LogoUpload
+                  setLogoFile={setLogoFileEmpresa}
+                  logo={empresaCreate.logo}
+                  setLogo={(logo) =>
+                    setEmpresaCreate({ ...empresaCreate, logo: logo })
+                  }
+                />
+              </div>
+              <div className="model grid grid-cols-2 gap-3 mt-4 relative my-4">
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Name
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={empresaCreate?.name}
+                    onChange={(e) => handleCreateChange("name", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Email
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={empresaCreate?.email}
+                    onChange={(e) =>
+                      handleCreateChange("email", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Celular
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={empresaCreate?.phone_contact}
+                    onChange={(e) =>
+                      handleCreateChange("phone_contact", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Sitio Web
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={empresaCreate?.website}
+                    onChange={(e) =>
+                      handleCreateChange("website", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <label className="text-sm w-full block font-medium mb-4 ">
+                Sede
+              </label>
+              <div className="w-full pl-4 my-4 grid grid-cols-1 gap-4">
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Nombre de referencia
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={sedeCreate?.name}
+                    onChange={(e) =>
+                      handleCreateSedeChange("name", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Direccion
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={sedeCreate?.location}
+                    onChange={(e) =>
+                      handleCreateSedeChange("location", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Link Google Maps
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={sedeCreate?.map_url}
+                    onChange={(e) =>
+                      handleCreateSedeChange("map_url", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => handlePrevSteps()}
+                  disabled={nowStep === 1}
+                  className="bg-gray-200 text-gray-800 p-3 rounded"
+                >
+                  Anterior
+                </button>
+                <button
+                  onClick={() => handleNextSteps()}
+                  className="bg-dark-purple text-white p-3 rounded"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </>
+          ) : null}
 
-          <div className="model grid grid-cols-2 gap-3 mt-4 relative my-4">
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Name
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={empresaCreate?.name}
-                onChange={(e) => handleCreateChange("name", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Email
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={empresaCreate?.email}
-                onChange={(e) => handleCreateChange("email", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Celular
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={empresaCreate?.phone_contact}
-                onChange={(e) =>
-                  handleCreateChange("phone_contact", e.target.value)
-                }
-              />
-            </div>
-          </div>
-          <label className="text-sm w-full block font-medium mb-4 ">Sede</label>
-          <div className="w-full pl-4 my-4 grid grid-cols-1 gap-4">
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Nombre de referencia
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={sedeCreate?.name}
-                onChange={(e) => handleCreateSedeChange("name", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Direccion
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={sedeCreate?.location}
-                onChange={(e) =>
-                  handleCreateSedeChange("location", e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Link Google Maps
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={sedeCreate?.map_url}
-                onChange={(e) =>
-                  handleCreateSedeChange("map_url", e.target.value)
-                }
-              />
-            </div>
-          </div>
+          {nowStep === 2 ? (
+            <>
+              <div className="model grid grid-cols-2 gap-3 mt-4 relative my-4">
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Name
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={usuarioCreate?.name}
+                    onChange={(e) =>
+                      handleCreateUsuarioChange("name", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Email
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={usuarioCreate?.email}
+                    onChange={(e) =>
+                      handleCreateUsuarioChange("email", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    password
+                  </label>
+                  <input
+                    placeholder="Ingresa el nombre del modulo"
+                    className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                    type="text"
+                    value={usuarioCreate?.password}
+                    onChange={(e) =>
+                      handleCreateUsuarioChange("password", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => handlePrevSteps()}
+                  className="bg-gray-200 text-gray-800 p-3 rounded"
+                >
+                  Anterior
+                </button>
+                <button
+                  onClick={() => handleNextSteps()}
+                  className="bg-dark-purple text-white p-3 rounded"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </>
+          ) : null}
 
-          <h1 className="font-bold text-lg mb-2">Crea tu Usuario</h1>
-          <div className="bg-gray-400 h-[2px] w-full mb-4"></div>
+          {nowStep === 3 ? (
+            <>
+              <div className="model grid grid-cols-2 gap-3 mt-4 relative my-4">
+                {plans.length > 0 &&
+                  plans.map((p, index) => {
+                    return (
+                      <div
+                        onClick={(e) => handleSelectPlans(p.id, e)}
+                        key={index}
+                        className={`w-full transition-all duration-300 p-4 rounded cursor-pointer ${
+                          selectPlans === p.id
+                            ? "bg-dark-purple text-white"
+                            : "bg-gray-100 text-gray-800 hover:bg-[#7f6bef]"
+                        } shadow-sm 0 relative`}
+                      >
+                        <Checkbox
+                          checked={selectPlans === p.id}
+                          onClick={(e) => handleSelectPlans(p.id, e)}
+                          style={{ marginRight: "10px" }}
+                        />
+                        <h1 className="mb-6 font-bold text-lg">{p.name}</h1>
+                        <span className="font-bold text-xl">{p.price}</span>
+                        <div className="grid grid-cols-1 gap-2">
+                          {p.modules.map((m, index) => {
+                            return (
+                              <div key={index} className="w-full">
+                                {m.name}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+              <div className="model grid grid-cols-2 gap-3 mt-4 relative my-4">
+                <div>
+                  <label className="text-sm w-full block font-medium mb-4 ">
+                    Plan Tiempo
+                  </label>
+                  <RangePicker onChange={(e) => handleSubscriptionChange(e)} />
+                </div>
+              </div>
 
-          <div className="model grid grid-cols-2 gap-3 mt-4 relative my-4">
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Name
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={usuarioCreate?.name}
-                onChange={(e) =>
-                  handleCreateUsuarioChange("name", e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Email
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={usuarioCreate?.email}
-                onChange={(e) =>
-                  handleCreateUsuarioChange("email", e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                password
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={usuarioCreate?.password}
-                onChange={(e) =>
-                  handleCreateUsuarioChange("password", e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm w-full block font-medium mb-4 ">
-                Plan
-              </label>
-              <input
-                placeholder="Ingresa el nombre del modulo"
-                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
-                type="text"
-                value={usuarioCreate?.password}
-                onChange={(e) =>
-                  handleCreateUsuarioChange("password", e.target.value)
-                }
-              />
-            </div>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={() => handleOkCreate()}
-              className="bg-dark-purple text-white p-3 rounded"
-            >
-              Crear Empresa
-            </button>
-          </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => handlePrevSteps()}
+                  disabled={nowStep === 1}
+                  className="bg-gray-200 text-gray-800 p-3 rounded"
+                >
+                  Anterior
+                </button>
+                <button
+                  onClick={() => handleOkCreate()}
+                  className="bg-dark-purple text-white p-3 rounded"
+                >
+                  Crear Empresa
+                </button>
+              </div>
+            </>
+          ) : null}
         </div>
       </Modal>
       <div className="horizontal-options flex items-center mb-[24px]">
@@ -804,11 +1130,10 @@ const Empresas = () => {
             <tr>
               <td align="center">Logo</td>
               <td>Name </td>
-              <td>Email </td>
               <td>Admin </td>
-              <td>Sedes </td>
-              <td>Phone Contact </td>
-              <td>Website </td>
+              <td>Plan </td>
+              <td>Estado </td>
+              <td>Renovacion </td>
               <td className="ajustes-tabla-celda">Acciones</td>
             </tr>
           </thead>
@@ -828,17 +1153,19 @@ const Empresas = () => {
                       ></div>
                     </td>
                     <td>{item.name}</td>
-                    <td>{item.email}</td>
                     <td>
                       <b>{item.admin.name}</b> <br /> {item.admin.email}
                     </td>
                     <td>
-                      <button className="w-full rounded-full bg-dark-purple text-white p-2">
-                        Ver Sedes
-                      </button>
+                      {item.admin.subscriptions[0].plan.name} <br />{" "}
+                      {item.admin.subscriptions[0].plan.price}
                     </td>
-                    <td>{item.phoneContact}</td>
-                    <td>{item.website}</td>
+                    <td>{item.admin.subscriptions[0].status}</td>
+                    <td>
+                      {dayjs(item.admin.subscriptions[0].endDate)
+                        .locale("es")
+                        .format("DD [de] MMMM [del] YYYY")}
+                    </td>
 
                     <td className="ajustes-tabla-celda">
                       <div className="ajustes-tabla-celda-item px-4">

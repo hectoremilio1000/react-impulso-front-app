@@ -8,11 +8,15 @@ import Login from "./pages/Login";
 import Modules from "./pages/superadmin/Modules";
 import Plans from "./pages/superadmin/Plans";
 import Usuarios from "./pages/superadmin/Usuarios";
+import UsuariosAdmin from "./pages/admin/UsuariosAdmin";
 import Layout from "./components/rolSuperAdmin/Layout";
 import Dashboard from "./pages/superadmin/Dashboard";
 import Empresas from "./pages/superadmin/Empresas";
 import Panel from "./pages/admin/Panel";
 import Prospects from "./pages/superadmin/Prospects";
+import LayoutAdmin from "./components/rolAdmin/Layout";
+import Manage from "./pages/admin/Manage";
+import DashboardAdmin from "./pages/admin/DashboardAdmin";
 
 function App() {
   return (
@@ -21,11 +25,31 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           {/* RUTAS PARA USUARIO ADMIN */}
+
+          <Route
+            path="manage/:companyId/sede/:idSede"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <LayoutAdmin></LayoutAdmin>
+              </PrivateRoute>
+            }
+          >
+            <Route index element={<DashboardAdmin />} />
+            <Route path="usuarios" element={<UsuariosAdmin />} />
+          </Route>
           <Route
             path="/panel"
             element={
               <PrivateRoute roles={["admin"]}>
                 <Panel />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/manage"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <Manage />
               </PrivateRoute>
             }
           />

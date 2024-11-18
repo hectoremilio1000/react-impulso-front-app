@@ -209,36 +209,36 @@ const Usuarios = () => {
       ),
     },
   ];
-  const buscarEmpresas = async () => {
-    try {
-      const response = await axios.get(
-        `${apiUrl}/businessbyuser/${session.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.token}`,
-          },
-        }
-      );
-      let todas = { id: "Todas", nombre_razon: "Todas" };
-      //   setBusinessActive(response.data[0].id);
-      response.data.push(todas);
-      setBusinessActive(response.data[0].id);
-      setUsuarioCreate({ ...usuarioCreate, empresa_id: response.data[0].id });
-      console.log(response.data);
-      setBusiness(response.data);
-    } catch (error) {
-      console.error("Error al obtener las empresas:", error);
-    }
-  };
-  console.log(businessActive);
-  const buscarEmpresaId = (id) => {
-    const search = business.find((b) => b.id === id);
-    return search.nombre_razon;
-  };
-  useEffect(() => {
-    // eslint-disable-next-line
-    buscarEmpresas();
-  }, [0]);
+  // const buscarEmpresas = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${apiUrl}/businessbyuser/${session.id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${session.token}`,
+  //         },
+  //       }
+  //     );
+  //     let todas = { id: "Todas", nombre_razon: "Todas" };
+  //     //   setBusinessActive(response.data[0].id);
+  //     response.data.push(todas);
+  //     setBusinessActive(response.data[0].id);
+  //     setUsuarioCreate({ ...usuarioCreate, empresa_id: response.data[0].id });
+  //     console.log(response.data);
+  //     setBusiness(response.data);
+  //   } catch (error) {
+  //     console.error("Error al obtener las empresas:", error);
+  //   }
+  // };
+  // console.log(businessActive);
+  // const buscarEmpresaId = (id) => {
+  //   const search = business.find((b) => b.id === id);
+  //   return search.nombre_razon;
+  // };
+  // useEffect(() => {
+  //   // eslint-disable-next-line
+  //   buscarEmpresas();
+  // }, [0]);
   const buscarUsuarios = async () => {
     try {
       const response = await axios.get(`${apiUrl}/users`, {

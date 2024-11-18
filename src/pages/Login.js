@@ -15,7 +15,7 @@ const Login = () => {
       if (role === "superadmin") {
         navigate("/usuarios"); // Redirigir a la ruta de usuarios
       } else if (role === "admin") {
-        navigate("/panel"); // Redirigir al panel con módulos en formato grid
+        navigate("/manage"); // Redirigir al panel con módulos en formato grid
       } else {
         navigate("/"); // Ruta por defecto
       }
