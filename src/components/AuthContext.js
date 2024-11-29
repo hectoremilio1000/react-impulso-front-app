@@ -46,8 +46,9 @@ export const AuthProvider = ({ children }) => {
 
       const response = await axios.request(config);
       const data = response.data;
+      console.log(data);
 
-      setAuth({ ...auth, user: data.user });
+      setAuth({ ...auth, user: data.user, token: token });
     } catch (error) {
       console.error("Error fetching user", error);
     } finally {

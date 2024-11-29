@@ -1,7 +1,566 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Checkbox, Dropdown, Modal, Select, Space, DatePicker } from "antd";
+import LogoUpload from "../../components/LogoUpload";
+import { TbAdjustments, TbCaretDownFilled } from "react-icons/tb";
+import { FaEdit, FaEllipsisV, FaEye, FaTrash } from "react-icons/fa";
+import { FiImage } from "react-icons/fi";
+import { BsViewList } from "react-icons/bs";
+import { Link, NavLink } from "react-router-dom";
+import { AiOutlineSearch } from "react-icons/ai";
+import dayjs from "dayjs";
+import { useAuth } from "../../components/AuthContext";
+import axios from "axios";
+import { MdAdd } from "react-icons/md";
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const Prospects = () => {
-  return <div>Prospects</div>;
+  const { auth } = useAuth();
+  const items = [
+    {
+      key: "1",
+      label: (
+        <p
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.antgroup.com"
+        >
+          Editar
+        </p>
+      ),
+    },
+  ];
+  // steps formulario
+  const [nowStep, setNowStep] = useState(1);
+  const handleNextSteps = () => {
+    setNowStep(nowStep + 1);
+  };
+  const handlePrevSteps = () => {
+    setNowStep(nowStep - 1);
+  };
+  const [prospects, setProspects] = useState([]);
+  const [filterProspects, setFilterProspects] = useState([]);
+  const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [selectProspects, setSelectProspects] = useState(null);
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  const abrirModalCreate = (e) => {
+    e.stopPropagation();
+    setIsModalOpenCreate(true);
+  };
+  const buscar_prospects = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/prospects`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      console.log(response);
+      const data = response.data;
+      console.log(data);
+      if (data.status === "success") {
+        setProspects(data.data);
+        setFilterProspects(data.data);
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener los modulos:", error);
+    }
+  };
+  useEffect(() => {
+    buscar_prospects();
+  }, [auth, apiUrl]);
+
+  // ESTADOS PARA LA TABLA DINAMICA
+  const [itemsPerPage, setItemsPerPage] = useState(10); //items por pagina
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [visibleEmpresas, setVisibleProspects] = useState([]);
+  const [activeFilter, setActiveFilter] = useState(false);
+  const [filters, setFilters] = useState({
+    name: "",
+    email: "",
+    phone_contact: "",
+    website: "",
+    plans: [{ tipo: "Plan basico" }],
+    created_at: [null, null],
+  });
+
+  // Función para aplicar el filtro
+  const detectarTotalPages = (data) => {
+    if (data.length === 0) {
+      setTotalPages(1);
+    } else {
+      setTotalPages(Math.ceil(data.length / itemsPerPage));
+    }
+  };
+  const applyFilters = () => {
+    const regex = /^[a-zA-Z0-9\s]*$/; // Permite solo letras, números y espacios
+    const bol = regex.test(searchTerm) ? searchTerm : "";
+    console.log(bol);
+
+    if (bol === "") {
+      const filteredBusiness = filterProspects.filter((company) => {
+        const searchRegex = new RegExp(searchTerm, "i");
+
+        const matchSearch = Object.values(company).some((value) =>
+          searchRegex.test(value.toString())
+        );
+
+        const matchFilters =
+          (!filters.name || company.name === filters.name) &&
+          (!filters.email || company.email === filters.email) &&
+          (!filters.website || company.website === filters.website) &&
+          (!filters.created_at[0] ||
+            ((dayjs(company.created_at).isAfter(filters.created_at[0], "day") ||
+              dayjs(company.created_at).isSame(filters.created_at[0], "day")) &&
+              (dayjs(company.created_at).isBefore(
+                filters.created_at[1],
+                "day"
+              ) ||
+                dayjs(company.created_at).isSame(
+                  filters.created_at[1],
+                  "day"
+                ))));
+
+        return matchSearch && matchFilters;
+      });
+      detectarTotalPages(filteredBusiness);
+      const objetosOrdenados = filteredBusiness.sort((a, b) =>
+        dayjs(b.fecha_created).isAfter(dayjs(a.fecha_created)) ? 1 : -1
+      );
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      // setCurrentPage(1);
+      const paginated = objetosOrdenados.slice(
+        startIndex,
+        startIndex + itemsPerPage
+      );
+
+      setVisibleProspects(paginated);
+    } else {
+      setSearchTerm(bol);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleFiltersChange = (changedFilters) => {
+    setFilters((prevFilters) => ({ ...prevFilters, ...changedFilters }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      name: "",
+      email: "",
+      phone_contact: "",
+      website: "",
+      created_at: [null, null],
+    });
+
+    setSearchTerm("");
+    setCurrentPage(1);
+    detectarTotalPages(filterProspects);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginated = filterProspects.slice(
+      startIndex,
+      startIndex + itemsPerPage
+    );
+
+    setVisibleProspects(paginated);
+  };
+  // useEffect para manejar el filtrado y paginación
+  useEffect(() => {
+    applyFilters(); // Aplicar filtro inicialmente
+  }, [filterProspects, currentPage, itemsPerPage, searchTerm]);
+
+  const handleDeleteProspects = async (id) => {
+    console.log(id);
+    // let propiedad_id = id;
+    // try {
+    //   const response = await eliminar_property(propiedad_id);
+    //   buscarPropiedades();
+    //   message.success("Se elimino correctamente la propiedad");
+    // } catch (error) {
+    //   message.error("No se elimino la propiedad, hubo un error");
+    // }
+  };
+  return (
+    <div className="w-full p-6 app-container-sections">
+      {/* modal create */}
+      <Modal
+        footer={null}
+        title="Register"
+        open={isModalOpenCreate}
+        // onOk={handleOkCreate}
+        // onCancel={handleCancelCreate}
+      >
+        <div className="relative w-full">
+          {loadingCreate ? (
+            <div className="bg-dark-purple z-50 text-white absolute top-0 left-0 right-0 bottom-0 w-full flex items-center justify-center">
+              Loading
+            </div>
+          ) : null}
+          <div className="w-full mb-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="w-full flex flex-col items-center">
+                <span
+                  className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
+                    nowStep >= 1
+                      ? "bg-dark-purple text-white"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  1
+                </span>
+                <span>Datos de Prospects</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-full flex items-center">
+                  <div
+                    className={`w-full h-[2px] rounded-full ${
+                      nowStep >= 2 ? "bg-dark-purple" : "bg-gray-200"
+                    }`}
+                  ></div>
+                  <div className="w-full flex flex-col items-center">
+                    <span
+                      className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
+                        nowStep >= 2
+                          ? "bg-dark-purple text-white"
+                          : "bg-gray-200 text-gray-800"
+                      }`}
+                    >
+                      2
+                    </span>
+                  </div>
+                  <div
+                    className={`w-full h-[2px] rounded-full ${
+                      nowStep >= 2 ? "bg-dark-purple" : "bg-gray-200"
+                    }`}
+                  ></div>
+                </div>
+                <span>Registrar Usuario</span>
+              </div>
+              <div className="w-full flex flex-col items-center">
+                <span
+                  className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
+                    nowStep === 3
+                      ? "bg-dark-purple text-white"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  3
+                </span>
+                <span>Selecciona el plan</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <div className="horizontal-options flex items-center mb-[24px]">
+        <div className="search-hook flex-grow">
+          <div className="inmocms-input bg-white border rounded border-gray-300 flex text-sm h-[46px] overflow-hidden font-normal">
+            <input
+              className="h-full px-[12px] w-full border-0 border-none focus:outline-none"
+              placeholder="Buscar prospectos"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoComplete="on"
+            />
+            <AiOutlineSearch className="h-full w-[24px] min-w-[24px] opacity-5 mx-[12px]" />
+          </div>
+        </div>
+        <div className="horizontal-options-items ml-[28px] flex items-center">
+          <button
+            onClick={() => setActiveFilter(!activeFilter)}
+            className="inmocms-button bg-dark-blue text-white rounded p-4"
+          >
+            <TbAdjustments />
+          </button>
+          <button
+            onClick={(e) => abrirModalCreate(e)}
+            className="btn-new ml-[12px] h-[46px] flex gap-2 items-center"
+          >
+            <MdAdd className="text-white" />
+            <span className="mobile-hide">Nuevo Prospecto</span>
+          </button>
+        </div>
+      </div>
+      <div
+        className={`${
+          activeFilter ? "" : "hidden"
+        } filters grid grid-cols-1 md:grid-cols-6 gap-4 bg-white py-4 px-3 mb-4`}
+      >
+        <Select
+          className="w-full text-sm"
+          value={filters.plans}
+          onChange={(value) => handleFiltersChange({ plan: value })}
+          placeholder="Plan"
+        >
+          <Option value="">Todos</Option>
+          {/* Agrega opciones según tus tipos */}
+          <Option value="Casa">Casa</Option>
+          <Option value="Departamento">Departamento</Option>
+          <Option value="Oficina">Oficina</Option>
+          <Option value="Lote">Lote</Option>
+        </Select>
+        <div className="col-span-2">
+          <RangePicker
+            className="w-full text-sm"
+            value={filters.created_at}
+            onChange={(dates) => handleFiltersChange({ created_at: dates })}
+            placeholder={["Fecha Creación Desde", "Fecha Creación Hasta"]}
+          />
+        </div>
+        <div className="w-full flex flex-col md:flex-row">
+          <button
+            className="p-3 rounded bg-white text-light-font text-xs"
+            onClick={() => handleClearFilters()}
+          >
+            Limpiar
+          </button>
+          <button
+            className="p-3 rounded bg-dark-purple text-white text-xs"
+            onClick={() => applyFilters()}
+          >
+            Buscar
+          </button>
+        </div>
+      </div>
+      <div className="box-table">
+        <table
+          className="inmocms-table"
+          cellPadding="0"
+          cellSpacing="0"
+          border="0"
+        >
+          <thead>
+            <tr>
+              <td align="center">Logo</td>
+              <td>Name </td>
+              <td>Admin </td>
+              <td>Plan </td>
+              <td>Estado </td>
+              <td>Renovacion </td>
+              <td className="ajustes-tabla-celda">Acciones</td>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleEmpresas.length > 0 &&
+              visibleEmpresas.map((item, index) => {
+                return (
+                  <tr className="" key={index}>
+                    <td>
+                      <div
+                        className="w-8 h-8 object-contain"
+                        style={{
+                          backgroundImage: `url('${item.logo}')`,
+                          backgroundPosition: "center",
+                          backgroundSize: "contain",
+                        }}
+                      ></div>
+                    </td>
+                    <td>{item.name}</td>
+                    <td>
+                      <b>{item.admin.name}</b> <br /> {item.admin.email}
+                    </td>
+                    <td>
+                      {item.admin.subscriptions[0].plan.name} <br />{" "}
+                      {item.admin.subscriptions[0].plan.price}
+                    </td>
+                    <td>{item.admin.subscriptions[0].status}</td>
+                    <td>
+                      {dayjs(item.admin.subscriptions[0].endDate)
+                        .locale("es")
+                        .format("DD [de] MMMM [del] YYYY")}
+                    </td>
+
+                    <td className="ajustes-tabla-celda">
+                      <div className="ajustes-tabla-celda-item px-4">
+                        <Dropdown
+                          className="text-sm text-gray-500"
+                          placement="bottomRight"
+                          menu={{
+                            items: [
+                              {
+                                label: (
+                                  <Link
+                                    to={`/companies/edit/${item.id}`}
+                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500"
+                                  >
+                                    <FaEdit /> Editar info
+                                  </Link>
+                                ),
+                                key: 1,
+                              },
+                              {
+                                label: (
+                                  <button
+                                    onClick={() => {
+                                      Modal.confirm({
+                                        title:
+                                          "¿Está seguro de eliminar la propiedad?",
+                                        content:
+                                          "Al eliminar la propiedad, se eliminarán los datos relacionados con la propiedad como: modelos, unidades y contenido multimedia",
+                                        onOk: () =>
+                                          handleDeleteProspects(item.id),
+                                        okText: "Eliminar",
+                                        cancelText: "Cancelar",
+                                      });
+                                    }}
+                                    className="w-full rounded flex items-center gap-2 text-sm text-red-500"
+                                  >
+                                    <FaTrash /> Eliminar
+                                  </button>
+                                ),
+                                key: 2,
+                              },
+                              {
+                                label: (
+                                  <Link
+                                    to={`/property/${item.id}/models`}
+                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500 "
+                                  >
+                                    <BsViewList /> Ver Modelos
+                                  </Link>
+                                ),
+                                key: 3,
+                              },
+                              {
+                                label: (
+                                  <Link
+                                    to={`/property/${item.id}/multimedia`}
+                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500 "
+                                  >
+                                    <FiImage /> Multimedia
+                                  </Link>
+                                ),
+                                key: 4,
+                              },
+                            ],
+                          }}
+                          trigger={["click"]}
+                        >
+                          <div
+                            className="text-xs w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-all duration-300"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Space>
+                              <FaEllipsisV />
+                            </Space>
+                          </div>
+                        </Dropdown>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
+      <div className="table-controls">
+        <div className="page">
+          <div className="txt">
+            Página {currentPage} de {totalPages}
+          </div>
+          <div style={{ marginBottom: "12px", marginRight: "24px" }}>
+            <Select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e));
+                setCurrentPage(1); // Reset page to 1 on items per page change
+              }}
+              // style={{
+              //   width: 120,
+              // }}
+              // dropdownMatchSelectWidth={false}
+              placement={"topLeft"}
+              options={[
+                {
+                  value: "1",
+                  label: "1",
+                },
+                {
+                  value: "10",
+                  label: "10",
+                },
+                {
+                  value: "25",
+                  label: "25",
+                },
+                {
+                  value: "50",
+                  label: "50",
+                },
+                {
+                  value: "100",
+                  label: "100",
+                },
+                {
+                  value: "500",
+                  label: "500",
+                },
+              ]}
+            />
+          </div>
+        </div>
+        <div className="pagination-controls flex gap-2 items-center">
+          <button
+            className={`p-3 text-xs rounded ${
+              currentPage === 1
+                ? "bg-light-purple text-dark-purple"
+                : "bg-dark-purple text-white"
+            }  `}
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+          >
+            1
+          </button>
+          <button
+            className={`p-3 text-xs rounded ${
+              currentPage === 1
+                ? "bg-light-purple text-dark-purple"
+                : "bg-dark-purple text-white"
+            }  `}
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            {"<"}
+          </button>
+          <button className="p-3 rounded bg-dark-purple text-white text-xs">
+            {currentPage}
+          </button>
+          <button
+            className={`p-3 text-xs rounded ${
+              currentPage === totalPages
+                ? "bg-light-purple text-dark-purple"
+                : "bg-dark-purple text-white"
+            }  `}
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            {">"}
+          </button>
+          <button
+            className={`p-3 text-xs rounded ${
+              currentPage === totalPages
+                ? "bg-light-purple text-dark-purple"
+                : "bg-dark-purple text-white"
+            }  `}
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            {totalPages}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Prospects;

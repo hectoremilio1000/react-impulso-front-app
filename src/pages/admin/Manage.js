@@ -54,14 +54,6 @@ const Manage = () => {
 
   return (
     <div className="w-full bg-white">
-      <div className="w-full px-3 py-2 flex justify-between">
-        <div className="logo">
-          <h1 className="text-gray-600 font-bold text-3xl">
-            App<span className="text-dark-purple">Impulso</span>
-          </h1>
-        </div>
-        <div className="menu"></div>
-      </div>
       <div className="w-full py-8 flex flex-col justify-center">
         <div className="w-full max-w-[800px] mx-auto">
           <h1 className="font-bold text-gray-600 mb-6 text-2xl">
@@ -116,6 +108,7 @@ const Manage = () => {
                     sedes.map((s, index) => {
                       return (
                         <Link
+                          key={index}
                           to={`/manage/${s.companyId}/sede/${s.id}`}
                           className="cursor-pointer w-full bg-gray-100 shadow rounded px-3 py-2"
                         >

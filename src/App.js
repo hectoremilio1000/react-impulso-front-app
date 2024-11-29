@@ -37,19 +37,14 @@ function App() {
             <Route index element={<DashboardAdmin />} />
             <Route path="usuarios" element={<UsuariosAdmin />} />
           </Route>
-          <Route
-            path="/panel"
-            element={
-              <PrivateRoute roles={["admin"]}>
-                <Panel />
-              </PrivateRoute>
-            }
-          />
+
           <Route
             path="/manage"
             element={
               <PrivateRoute roles={["admin"]}>
+                {/* <LayoutAdmin> */}
                 <Manage />
+                {/* </LayoutAdmin> */}
               </PrivateRoute>
             }
           />

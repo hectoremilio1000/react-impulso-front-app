@@ -24,19 +24,28 @@ const Modules = () => {
       ),
     },
   ];
+  const { auth } = useAuth();
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  // creacion de modulos estados
   const [modulos, setModulos] = useState([]);
   const [moduloCreate, setModuloCreate] = useState();
   const [filterModulos, setFilterModulos] = useState([]);
-  const apiUrl = process.env.REACT_APP_API_URL;
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [loadingCreateModulo, setLoadingCreateModulo] = useState(false);
-  const { auth } = useAuth();
 
+  // edicion de modulos estados
+  const [moduloEdit, setModuloEdit] = useState(null);
+  const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+  const [loadingEditModulo, setLoadingEditModulo] = useState(false);
+
+  // ESTADOS TABLA DINAMICA
   const [selectsProperties, setSelectsProperties] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(10); //items por pagina
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // ESTADOS DE FILTRO PARA TABLA DINAMICA
   const [searchTerm, setSearchTerm] = useState("");
   const [visibleModulos, setVisibleModulos] = useState([]);
   const [activeFilter, setActiveFilter] = useState(false);
@@ -45,90 +54,7 @@ const Modules = () => {
     description: "",
   });
 
-  const buscarModulos = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/modules`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      console.log(response);
-      if (response.data.status === "success") {
-        setModulos(response.data.data);
-        setFilterModulos(response.data.data);
-      } else {
-        console.log(response.data.message);
-      }
-    } catch (error) {
-      console.error("Error al obtener los modulos:", error);
-    }
-  };
-
-  // Función para aplicar el filtro
-  const detectarTotalPages = (data) => {
-    if (data.length === 0) {
-      setTotalPages(1);
-    } else {
-      setTotalPages(Math.ceil(data.length / itemsPerPage));
-    }
-  };
-  const applyFilters = () => {
-    const regex = /^[a-zA-Z0-9\s]*$/; // Permite solo letras, números y espacios
-    const bol = regex.test(searchTerm) ? true : false;
-
-    if (bol && filterModulos.length > 0) {
-      const filteredUsuarios = filterModulos.filter((modulo) => {
-        const searchRegex = new RegExp(searchTerm, "i");
-
-        const matchSearch = Object.values(modulo).some((value) =>
-          searchRegex.test(value.toString())
-        );
-
-        // const matchFilters =
-        //   !filters.fechaCreatedRange[0] ||
-        //   ((dayjs(modulo.fecha_created).isAfter(
-        //     filters.fechaCreatedRange[0],
-        //     "day"
-        //   ) ||
-        //     dayjs(modulo.fecha_created).isSame(
-        //       filters.fechaCreatedRange[0],
-        //       "day"
-        //     )) &&
-        //     (dayjs(modulo.fecha_created).isBefore(
-        //       filters.fechaCreatedRange[1],
-        //       "day"
-        //     ) ||
-        //       dayjs(modulo.fecha_created).isSame(
-        //         filters.fechaCreatedRange[1],
-        //         "day"
-        //       )));
-
-        // return matchSearch && matchFilters;
-        return matchSearch;
-      });
-      detectarTotalPages(filteredUsuarios);
-      const objetosOrdenados = filteredUsuarios.sort((a, b) =>
-        dayjs(b.fecha_created).isAfter(dayjs(a.fecha_created)) ? 1 : -1
-      );
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      // setCurrentPage(1);
-      const paginatedUsuarios = objetosOrdenados.slice(
-        startIndex,
-        startIndex + itemsPerPage
-      );
-
-      setVisibleModulos(paginatedUsuarios);
-    } else {
-      setSearchTerm("");
-    }
-  };
-
-  // useEffect para manejar el filtrado y paginación
-  useEffect(() => {
-    applyFilters(); // Aplicar filtro inicialmente
-  }, [filterModulos, currentPage, itemsPerPage, searchTerm]);
-
+  // EVENTOS DE SELECCION DE REGISTROS
   const handleSelect = (e, id) => {
     e.stopPropagation();
     setSelectsProperties((prevSelects) => {
@@ -170,10 +96,19 @@ const Modules = () => {
     setCurrentPage(newPage);
   };
 
+  // Función para aplicar el filtro
+  const detectarTotalPages = (data) => {
+    if (data.length === 0) {
+      setTotalPages(1);
+    } else {
+      setTotalPages(Math.ceil(data.length / itemsPerPage));
+    }
+  };
+
+  // EVENTOS DE FILTROS DE REGISTROS
   const handleFiltersChange = (changedFilters) => {
     setFilters((prevFilters) => ({ ...prevFilters, ...changedFilters }));
   };
-
   const handleClearFilters = () => {
     setFilters({
       tipo: "",
@@ -195,12 +130,88 @@ const Modules = () => {
       startIndex + itemsPerPage
     );
 
-    visibleModulos(paginatedUsuarios);
+    setVisibleModulos(paginatedUsuarios);
+  };
+  const applyFilters = () => {
+    const regex = /^[a-zA-Z0-9\s]*$/; // Permite solo letras, números y espacios
+    const bol = regex.test(searchTerm) ? true : false;
+
+    if (bol && filterModulos.length > 0) {
+      const filteredUsuarios = filterModulos.filter((modulo) => {
+        const searchRegex = new RegExp(searchTerm, "i");
+
+        const matchSearch = Object.values(modulo).some((value) =>
+          searchRegex.test(value)
+        );
+
+        // const matchFilters =
+        //   !filters.fechaCreatedRange[0] ||
+        //   ((dayjs(modulo.fecha_created).isAfter(
+        //     filters.fechaCreatedRange[0],
+        //     "day"
+        //   ) ||
+        //     dayjs(modulo.fecha_created).isSame(
+        //       filters.fechaCreatedRange[0],
+        //       "day"
+        //     )) &&
+        //     (dayjs(modulo.fecha_created).isBefore(
+        //       filters.fechaCreatedRange[1],
+        //       "day"
+        //     ) ||
+        //       dayjs(modulo.fecha_created).isSame(
+        //         filters.fechaCreatedRange[1],
+        //         "day"
+        //       )));
+
+        // return matchSearch && matchFilters;
+        return matchSearch;
+      });
+      detectarTotalPages(filteredUsuarios);
+      const objetosOrdenados = filteredUsuarios.sort((a, b) =>
+        dayjs(b.fecha_created).isAfter(dayjs(a.fecha_created)) ? 1 : -1
+      );
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      // setCurrentPage(1);
+      const paginatedUsuarios = objetosOrdenados.slice(
+        startIndex,
+        startIndex + itemsPerPage
+      );
+
+      setVisibleModulos(paginatedUsuarios);
+    } else {
+      setSearchTerm("");
+    }
+  };
+  useEffect(() => {
+    applyFilters(); // Aplicar filtro inicialmente
+  }, [filterModulos, currentPage, itemsPerPage, searchTerm]);
+
+  // EVENTOS DE BUSQUEDA DE DATOS
+  const buscarModulos = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/modules`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      console.log(response);
+      if (response.data.status === "success") {
+        setModulos(response.data.data);
+        setFilterModulos(response.data.data);
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener los modulos:", error);
+    }
   };
   useEffect(() => {
     // eslint-disable-next-line
     buscarModulos();
   }, [0]);
+
+  // EVENTOS DE CREACION DE MODULOS
   const createModulo = async (newModulo) => {
     const token = auth.token;
 
@@ -257,9 +268,23 @@ const Modules = () => {
     });
     setIsModalOpenCreate(false);
   };
-  const eliminar_property = (modulo_id) => {
+  const abrirModalCreate = (e) => {
+    e.stopPropagation();
+
+    setIsModalOpenCreate(true);
+  };
+
+  const handleUsuarioChangeCreate = (key, value) => {
+    setModuloCreate((prev) => {
+      const newModelo = { ...prev, [key]: value };
+
+      return newModelo;
+    });
+  };
+  // EVENTOS DE ELIMINACION DE MODULOS
+  const deleteModule = (id) => {
     return new Promise(async (resolve, reject) => {
-      const response = await axios.delete(`${apiUrl}/module/${modulo_id}`, {
+      const response = await axios.delete(`${apiUrl}/modules/${id}`, {
         headers: {
           Authorization: `Bearer ${auth.token}`,
         },
@@ -268,29 +293,85 @@ const Modules = () => {
       resolve(response.data);
     });
   };
-  const handleEliminarProperty = async (id) => {
-    console.log(id);
-    let propiedad_id = id;
+  const handleDeleteModule = async (id) => {
     try {
-      const response = await eliminar_property(propiedad_id);
-      buscarModulos();
+      const response = await deleteModule(id);
+      await buscarModulos();
       message.success("Se elimino correctamente la propiedad");
     } catch (error) {
       message.error("No se elimino la propiedad, hubo un error");
     }
   };
-  const abrirModalCreate = (e) => {
-    e.stopPropagation();
+  // EVENTOS DE EDICION DE MODULOS
+  const updateModulo = async (newModulo) => {
+    const token = auth.token;
 
-    setIsModalOpenCreate(true);
+    try {
+      const response = await axios.put(
+        `${apiUrl}/modules/${newModulo.id}`,
+        newModulo,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+      return response.data; // Simplemente devuelve los datos
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Lanza el error para que pueda ser capturado en el llamado
+    }
   };
-  const handleUsuarioChangeCreate = (key, value) => {
-    setModuloCreate((prev) => {
-      const newModelo = { ...prev, [key]: value };
 
-      return newModelo;
+  const abrirModalEdit = (e, id) => {
+    e.stopPropagation();
+    const moduloSearch = modulos.find((m) => m.id === id);
+    setModuloEdit(moduloSearch);
+
+    setIsModalOpenEdit(true);
+  };
+  const handleOkEdit = async () => {
+    if (moduloEdit.name !== "" && moduloEdit.description !== "") {
+      setLoadingEditModulo(true);
+      const newModulo = { ...moduloEdit };
+      try {
+        const userData = await updateModulo(newModulo);
+        console.log(userData);
+        if (userData.status === "success") {
+          setModuloEdit(null);
+          setIsModalOpenEdit(false);
+          await buscarModulos();
+          setLoadingEditModulo(false);
+        } else {
+          message.error(
+            "Ocurrio un error al crear el modelo, intentelo mas tarde"
+          );
+          setLoadingEditModulo(false);
+        }
+      } catch (error) {
+        message.error("Ocurrió un error durante la creación del módulo");
+      } finally {
+        setLoadingEditModulo(false);
+      }
+    } else {
+      message.warning("Debe llenar todos los campos");
+      setLoadingEditModulo(false);
+    }
+  };
+  const handleCancelEdit = () => {
+    setModuloEdit(null);
+    setIsModalOpenEdit(false);
+  };
+  const handleUsuarioChangeEdit = (key, value) => {
+    setModuloEdit((prev) => {
+      const newModulo = { ...prev, [key]: value };
+
+      return newModulo;
     });
   };
+
   return (
     <div className="w-full p-6 app-container-sections">
       <div
@@ -403,6 +484,61 @@ const Modules = () => {
           </div>
         </div>
       </Modal>
+      {/* modal edit */}
+      <Modal
+        footer={null}
+        title="Update Modulo"
+        open={isModalOpenEdit}
+        onOk={handleOkEdit}
+        onCancel={handleCancelEdit}
+      >
+        <div className="relative w-full">
+          {loadingEditModulo ? (
+            <div className="bg-dark-purple z-50 text-white absolute top-0 left-0 right-0 bottom-0 w-full flex items-center justify-center">
+              Loading
+            </div>
+          ) : null}
+
+          <div className="model grid grid-cols-1 gap-3 mt-4 relative">
+            <div>
+              <label className="text-sm w-full block font-medium mb-4 ">
+                Name
+              </label>
+              <input
+                placeholder="Ingresa el nombre del modulo"
+                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                type="text"
+                value={moduloEdit?.name}
+                onChange={(e) =>
+                  handleUsuarioChangeEdit("name", e.target.value)
+                }
+              />
+            </div>
+            <div>
+              <label className="text-sm w-full block font-medium mb-4 ">
+                Description
+              </label>
+              <input
+                placeholder="descripcion de ejemplo..."
+                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                type="text"
+                value={moduloEdit?.description}
+                onChange={(e) =>
+                  handleUsuarioChangeEdit("description", e.target.value)
+                }
+              />
+            </div>
+          </div>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => handleOkEdit()}
+              className="bg-dark-purple text-white p-3 rounded"
+            >
+              Update Module
+            </button>
+          </div>
+        </div>
+      </Modal>
       <div
         className={`${
           activeFilter ? "" : "hidden"
@@ -497,12 +633,14 @@ const Modules = () => {
                             items: [
                               {
                                 label: (
-                                  <Link
-                                    to={`/propiedades/editar/${modulo.id}`}
+                                  <div
+                                    onClick={(e) =>
+                                      abrirModalEdit(e, modulo.id)
+                                    }
                                     className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500"
                                   >
                                     <FaEdit /> Editar info
-                                  </Link>
+                                  </div>
                                 ),
                                 key: 1,
                               },
@@ -512,11 +650,11 @@ const Modules = () => {
                                     onClick={() => {
                                       Modal.confirm({
                                         title:
-                                          "¿Está seguro de eliminar la propiedad?",
+                                          "¿Está seguro de eliminar este modulo?",
                                         content:
-                                          "Al eliminar la propiedad, se eliminarán los datos relacionados con la propiedad como: modelos, unidades y contenido multimedia",
+                                          "Al eliminar el modulo, se eliminarán los datos relacionados con la el modulo como: planes y  suscripciones de usuarios",
                                         onOk: () =>
-                                          handleEliminarProperty(modulo.id),
+                                          handleDeleteModule(modulo.id),
                                         okText: "Eliminar",
                                         cancelText: "Cancelar",
                                       });

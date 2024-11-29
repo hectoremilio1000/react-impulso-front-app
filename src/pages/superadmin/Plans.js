@@ -18,6 +18,7 @@ import { Link } from "react-router-dom";
 import { FaEdit, FaEllipsisV, FaTrash } from "react-icons/fa";
 
 const Plans = () => {
+  const { auth } = useAuth();
   const items = [
     {
       key: "1",
@@ -32,17 +33,11 @@ const Plans = () => {
       ),
     },
   ];
-  // API URL y creacion de plan
-  const [planCreate, setPlanCreate] = useState(null);
   const apiUrl = process.env.REACT_APP_API_URL;
-  const { auth } = useAuth();
-  // FIN API URL y creacion de plan
 
-  // MODULOS
+  // seleccion de modulos estados
   const [modulos, setModulos] = useState([]);
   const [selectModules, setSelectModules] = useState([]);
-  const [selectPlans, setSelectPlans] = useState([]);
-
   // Maneja la selección de módulos
   const handleSelectModules = (id, e) => {
     e.stopPropagation();
@@ -58,38 +53,25 @@ const Plans = () => {
     });
   };
 
-  const buscarModulos = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/modules`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      console.log(response);
-      if (response.data.status === "success") {
-        setModulos(response.data.data);
-      } else {
-        console.log(response.data.message);
-      }
-    } catch (error) {
-      console.error("Error al obtener los modulos:", error);
-    }
-  };
-  useEffect(() => {
-    buscarModulos();
-  }, [0]);
-
+  // creacion de planes estados
+  const [plans, setPlans] = useState([]);
+  const [planCreate, setPlanCreate] = useState(null);
+  const [filterPlans, setFilterPlans] = useState([]);
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [loadingCreatePlan, setLoadingCreatePlan] = useState(false);
-  const [plans, setPlans] = useState([]);
-  const [filterPlans, setFilterPlans] = useState([]);
+  // update de planes estados
+  const [planEdit, setPlanEdit] = useState(null);
+  const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+  const [loadingEditPlan, setLoadingEditPlan] = useState(false);
 
+  // ESTADOS TABLA DINAMICA
+  const [selectPlans, setSelectPlans] = useState([]);
   const [selectsProperties, setSelectsProperties] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(10); //items por pagina
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // ESTADOS DE FILTRO PARA TABLA DINAMICA
   const [searchTerm, setSearchTerm] = useState("");
   const [visiblePlans, setVisiblePlans] = useState([]);
   const [activeFilter, setActiveFilter] = useState(false);
@@ -98,6 +80,8 @@ const Plans = () => {
     description: "",
     precioRange: [0, Infinity],
   });
+
+  // EVENTOS DE SELECCION DE REGISTROS
   const handleSelect = (e, id) => {
     e.stopPropagation();
     setSelectPlans((prevSelects) => {
@@ -138,6 +122,20 @@ const Plans = () => {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
+
+  // Función para aplicar el filtro
+  const detectarTotalPages = (data) => {
+    if (data.length === 0) {
+      setTotalPages(1);
+    } else {
+      setTotalPages(Math.ceil(data.length / itemsPerPage));
+    }
+  };
+
+  // EVENTOS DE FILTROS DE REGISTROS
+  const handleFiltersChange = (changedFilters) => {
+    setFilters((prevFilters) => ({ ...prevFilters, ...changedFilters }));
+  };
   const handleClearFilters = () => {
     setFilters({
       name: "",
@@ -155,39 +153,6 @@ const Plans = () => {
     );
 
     visiblePlans(paginatedPlans);
-  };
-
-  const buscarPlans = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/plans`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      console.log(response);
-      if (response.data.status === "success") {
-        setPlans(response.data.data);
-        setFilterPlans(response.data.data);
-      } else {
-        console.log(response.data.message);
-      }
-    } catch (error) {
-      console.error("Error al obtener los planes:", error);
-    }
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line
-    buscarPlans();
-  }, [0]);
-  // Función para aplicar el filtro
-  const detectarTotalPages = (data) => {
-    if (data.length === 0) {
-      setTotalPages(1);
-    } else {
-      setTotalPages(Math.ceil(data.length / itemsPerPage));
-    }
   };
   const applyFilters = () => {
     const regex = /^[a-zA-Z0-9\s]*$/; // Permite solo letras, números y espacios
@@ -239,12 +204,57 @@ const Plans = () => {
       setSearchTerm("");
     }
   };
-
-  // useEffect para manejar el filtrado y paginación
   useEffect(() => {
     applyFilters(); // Aplicar filtro inicialmente
   }, [filterPlans, currentPage, itemsPerPage, searchTerm]);
 
+  // EVENTOS DE BUSQUEDA DE DATOS
+  const buscarModulos = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/modules`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      console.log(response);
+      if (response.data.status === "success") {
+        setModulos(response.data.data);
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener los modulos:", error);
+    }
+  };
+  useEffect(() => {
+    buscarModulos();
+  }, [0]);
+  const buscarPlans = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/plans`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      console.log(response);
+      if (response.data.status === "success") {
+        setPlans(response.data.data);
+        setFilterPlans(response.data.data);
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener los planes:", error);
+    }
+  };
+  useEffect(() => {
+    // eslint-disable-next-line
+    buscarPlans();
+  }, [0]);
+
+  // EVENTOS DE CREACION DE PLANES
   const createPlan = async (newPlan) => {
     const token = auth.token;
 
@@ -335,6 +345,76 @@ const Plans = () => {
   };
   const handleChangePlanCreate = (key, value) => {
     setPlanCreate((prev) => {
+      const newModelo = { ...prev, [key]: value };
+
+      return newModelo;
+    });
+  };
+  // EVENTOS DE EDIT DE PLANES
+  const editPlan = async (newPlan) => {
+    const token = auth.token;
+
+    try {
+      const response = await axios.post(`${apiUrl}/plans`, newPlan, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      return response.data; // Simplemente devuelve los datos
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Lanza el error para que pueda ser capturado en el llamado
+    }
+  };
+  const handleOkEdit = async () => {
+    if (planCreate.name !== "" && planCreate.description !== "") {
+      setLoadingCreatePlan(true);
+      const newPlan = { ...planCreate, modules: selectModules };
+      console.log(newPlan);
+
+      try {
+        const userData = await createPlan(newPlan);
+        console.log(userData);
+        if (userData.status === "success") {
+          setPlanCreate({
+            name: "",
+            description: "",
+            price: "",
+          });
+          setSelectModules([]);
+          setIsModalOpenCreate(false);
+          await buscarPlans();
+          setLoadingCreatePlan(false);
+        } else {
+          message.error(
+            "Ocurrio un error al crear el modelo, intentelo mas tarde"
+          );
+          setLoadingCreatePlan(false);
+        }
+      } catch (error) {
+        message.error("Ocurrió un error durante la creación del plan");
+      } finally {
+        setLoadingCreatePlan(false);
+      }
+    } else {
+      message.warning("Debe llenar todos los campos");
+      setLoadingCreatePlan(false);
+    }
+  };
+  const handleCancelEdit = () => {
+    setPlanEdit(null);
+    setIsModalOpenEdit(false);
+  };
+  const abrirModalEdit = (e, id) => {
+    e.stopPropagation();
+    const planSearch = plans.find((p) => p.id === id);
+    setPlanEdit(planSearch);
+    setIsModalOpenEdit(true);
+  };
+  const handleChangePlanEdit = (key, value) => {
+    setPlanEdit((prev) => {
       const newModelo = { ...prev, [key]: value };
 
       return newModelo;
@@ -495,12 +575,109 @@ const Plans = () => {
           </div>
         </div>
       </Modal>
+      <Modal
+        footer={null}
+        title="Update"
+        open={isModalOpenEdit}
+        onOk={handleOkEdit}
+        onCancel={handleCancelEdit}
+      >
+        <div className="relative w-full">
+          {loadingEditPlan ? (
+            <div className="bg-dark-purple z-50 text-white absolute top-0 left-0 right-0 bottom-0 w-full flex items-center justify-center">
+              Loading
+            </div>
+          ) : null}
+          <h1 className="font-bold text-lg mb-2">Detalle del Plan</h1>
+          <div className="bg-gray-400 h-[2px] w-full mb-4"></div>
+          <div className="model grid grid-cols-1 gap-3 mt-4 relative">
+            <div>
+              <label className="text-sm w-full block font-medium mb-4 ">
+                Name
+              </label>
+              <input
+                placeholder="Ingresa el nombre del modulo"
+                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                type="text"
+                value={planEdit?.name}
+                onChange={(e) => handleChangePlanEdit("name", e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-sm w-full block font-medium mb-4 ">
+                Description
+              </label>
+              <input
+                placeholder="descripcion de ejemplo..."
+                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                type="text"
+                value={planEdit?.description}
+                onChange={(e) =>
+                  handleChangePlanEdit("description", e.target.value)
+                }
+              />
+            </div>
+            <div>
+              <label className="text-sm w-full block font-medium mb-4 ">
+                Precio
+              </label>
+              <input
+                placeholder="descripcion de ejemplo..."
+                className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                type="number"
+                step={0.01}
+                min={0}
+                value={planEdit?.price !== null ? planEdit?.price : ""}
+                onChange={(e) => handleChangePlanEdit("price", e.target.value)}
+              />
+            </div>
+          </div>
+          <h1 className="font-bold text-lg mb-2">Modulos</h1>
+          <div className="bg-gray-400 h-[2px] w-full mb-4"></div>
+          <div className="w-full">
+            <div className="grid grid-cols-3 gap-4">
+              {modulos.map((m, index) => {
+                return (
+                  <div
+                    onClick={(e) => handleSelectModules(m.id, e)}
+                    key={index}
+                    className={`w-full flex items-center  transition-all duration-300 p-4 rounded cursor-pointer ${
+                      planEdit?.modules.some((objeto) => objeto.id === m.id)
+                        ? "bg-dark-purple text-white"
+                        : "bg-gray-100 text-gray-800 hover:bg-[#7f6bef]"
+                    } shadow-sm 0 relative`}
+                  >
+                    <Checkbox
+                      checked={planEdit?.modules.some(
+                        (objeto) => objeto.id === m.id
+                      )}
+                      onClick={(e) => handleSelectModules(m.id, e)}
+                      style={{ marginRight: "10px" }}
+                    />
+                    <h1 className="select-none">{m.name}</h1>
+                  </div>
+                );
+              })}
+            </div>
+            <span>{selectModules.length} modulos seleccionados</span>
+          </div>
+
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => handleOkEdit()}
+              className="bg-dark-purple text-white p-3 rounded"
+            >
+              Update Plan
+            </button>
+          </div>
+        </div>
+      </Modal>
       <div
         className={`${
           activeFilter ? "" : "hidden"
         } filters grid grid-cols-1 md:grid-cols-6 gap-4 bg-white py-4 px-3 mb-4`}
       >
-        <div className="w-full flex flex-col md:flex-row">
+        <div className="translate w-full flex flex-col md:flex-row">
           <button
             className="p-3 rounded bg-white text-light-font text-xs"
             onClick={() => handleClearFilters()}
@@ -601,12 +778,12 @@ const Plans = () => {
                             items: [
                               {
                                 label: (
-                                  <Link
-                                    to={`/propiedades/editar/${plan.id}`}
+                                  <div
+                                    onClick={(e) => abrirModalEdit(e, plan.id)}
                                     className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500"
                                   >
                                     <FaEdit /> Editar info
-                                  </Link>
+                                  </div>
                                 ),
                                 key: 1,
                               },
@@ -616,9 +793,9 @@ const Plans = () => {
                                     onClick={() => {
                                       Modal.confirm({
                                         title:
-                                          "¿Está seguro de eliminar la propiedad?",
+                                          "¿Está seguro de eliminar el plan?",
                                         content:
-                                          "Al eliminar la propiedad, se eliminarán los datos relacionados con la propiedad como: modelos, unidades y contenido multimedia",
+                                          "Al eliminar el plan, se eliminarán los datos relacionados con la suscripcion",
                                         onOk: () =>
                                           handleEliminarProperty(plan.id),
                                         okText: "Eliminar",
