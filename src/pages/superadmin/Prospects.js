@@ -198,7 +198,7 @@ const Prospects = () => {
         title="Register"
         open={isModalOpenCreate}
         // onOk={handleOkCreate}
-        // onCancel={handleCancelCreate}
+        onCancel={() => setIsModalOpenCreate(false)} // Cierra el modal al hacer clic en la "X"
       >
         <div className="relative w-full">
           {loadingCreate ? (
@@ -351,115 +351,46 @@ const Prospects = () => {
             </tr>
           </thead>
           <tbody>
-            {visibleEmpresas.length > 0 &&
-              visibleEmpresas.map((item, index) => {
-                return (
-                  <tr className="" key={index}>
-                    <td>
-                      <div
-                        className="w-8 h-8 object-contain"
-                        style={{
-                          backgroundImage: `url('${item.logo}')`,
-                          backgroundPosition: "center",
-                          backgroundSize: "contain",
-                        }}
-                      ></div>
-                    </td>
-                    <td>{item.name}</td>
-                    <td>
-                      <b>{item.admin.name}</b> <br /> {item.admin.email}
-                    </td>
-                    <td>
-                      {item.admin.subscriptions[0].plan.name} <br />{" "}
-                      {item.admin.subscriptions[0].plan.price}
-                    </td>
-                    <td>{item.admin.subscriptions[0].status}</td>
-                    <td>
-                      {dayjs(item.admin.subscriptions[0].endDate)
-                        .locale("es")
-                        .format("DD [de] MMMM [del] YYYY")}
-                    </td>
+          {visibleEmpresas.length > 0 &&
+  visibleEmpresas.map((item, index) => {
+    // Validar que `item` tenga las propiedades necesarias
+    const hasAdmin = item?.admin;
+    const hasSubscription = hasAdmin && item.admin.subscriptions?.[0];
+    const hasPlan = hasSubscription && item.admin.subscriptions[0].plan;
 
-                    <td className="ajustes-tabla-celda">
-                      <div className="ajustes-tabla-celda-item px-4">
-                        <Dropdown
-                          className="text-sm text-gray-500"
-                          placement="bottomRight"
-                          menu={{
-                            items: [
-                              {
-                                label: (
-                                  <Link
-                                    to={`/companies/edit/${item.id}`}
-                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500"
-                                  >
-                                    <FaEdit /> Editar info
-                                  </Link>
-                                ),
-                                key: 1,
-                              },
-                              {
-                                label: (
-                                  <button
-                                    onClick={() => {
-                                      Modal.confirm({
-                                        title:
-                                          "¿Está seguro de eliminar la propiedad?",
-                                        content:
-                                          "Al eliminar la propiedad, se eliminarán los datos relacionados con la propiedad como: modelos, unidades y contenido multimedia",
-                                        onOk: () =>
-                                          handleDeleteProspects(item.id),
-                                        okText: "Eliminar",
-                                        cancelText: "Cancelar",
-                                      });
-                                    }}
-                                    className="w-full rounded flex items-center gap-2 text-sm text-red-500"
-                                  >
-                                    <FaTrash /> Eliminar
-                                  </button>
-                                ),
-                                key: 2,
-                              },
-                              {
-                                label: (
-                                  <Link
-                                    to={`/property/${item.id}/models`}
-                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500 "
-                                  >
-                                    <BsViewList /> Ver Modelos
-                                  </Link>
-                                ),
-                                key: 3,
-                              },
-                              {
-                                label: (
-                                  <Link
-                                    to={`/property/${item.id}/multimedia`}
-                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500 "
-                                  >
-                                    <FiImage /> Multimedia
-                                  </Link>
-                                ),
-                                key: 4,
-                              },
-                            ],
-                          }}
-                          trigger={["click"]}
-                        >
-                          <div
-                            className="text-xs w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-all duration-300"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Space>
-                              <FaEllipsisV />
-                            </Space>
-                          </div>
-                        </Dropdown>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+    return (
+      <tr className="" key={index}>
+        <td>
+          <div
+            className="w-8 h-8 object-contain"
+            style={{
+              backgroundImage: `url('${item.logo || ""}')`,
+              backgroundPosition: "center",
+              backgroundSize: "contain",
+            }}
+          ></div>
+        </td>
+        <td>{item.name || "N/A"}</td>
+        <td>
+          <b>{hasAdmin ? item.admin.name : "Sin nombre"}</b> <br />
+          {hasAdmin ? item.admin.email : "Sin email"}
+        </td>
+        <td>
+          {hasPlan ? hasPlan.name : "Sin plan"} <br />
+          {hasPlan ? hasPlan.price : "Sin precio"}
+        </td>
+        <td>{hasSubscription ? item.admin.subscriptions[0].status : "N/A"}</td>
+        <td>
+          {hasSubscription
+            ? dayjs(item.admin.subscriptions[0].endDate)
+                .locale("es")
+                .format("DD [de] MMMM [del] YYYY")
+            : "Sin fecha"}
+        </td>
+        ...
+      </tr>
+    );
+  })}
           </tbody>
         </table>
       </div>
