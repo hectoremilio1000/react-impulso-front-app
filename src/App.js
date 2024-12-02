@@ -1,8 +1,12 @@
 import React from "react";
 import "./App.css";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./components/AuthContext";
-import AdminPanel from "./components/rolAdmin/AdminPanel";
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
 import Modules from "./pages/superadmin/Modules";
@@ -12,11 +16,12 @@ import UsuariosAdmin from "./pages/admin/UsuariosAdmin";
 import Layout from "./components/rolSuperAdmin/Layout";
 import Dashboard from "./pages/superadmin/Dashboard";
 import Empresas from "./pages/superadmin/Empresas";
-import Panel from "./pages/admin/Panel";
+
 import Prospects from "./pages/superadmin/Prospects";
 import LayoutAdmin from "./components/rolAdmin/Layout";
 import Manage from "./pages/admin/Manage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -24,8 +29,9 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          {/* RUTAS PARA USUARIO ADMIN */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
+          {/* RUTAS PARA USUARIO ADMIN */}
           <Route
             path="manage/:companyId/sede/:idSede"
             element={
@@ -109,6 +115,8 @@ function App() {
               </PrivateRoute>
             }
           />
+          {/* RUTA DE FORBIDDEN */}
+          <Route path="/forbidden" element={<NotFoundPage />} />
         </Routes>
       </Router>
     </AuthProvider>
