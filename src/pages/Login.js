@@ -46,12 +46,19 @@ const Login = () => {
           src="https://www.prosegur.com.pe/dam/jcr:b09e0c73-9185-469d-8e79-c315f0d344e6/admon%20restaurantes.jpg"
           alt=""
         />
-        <div className="z-50 absolute top-0 bottom-0 left-0 right-0 w-full bg-dark-purple opacity-70"></div>
+        <div
+  className="absolute inset-0 w-full z-50 bg-gradient-to-b from-[rgba(18,19,21,0.9)] via-[rgba(184,161,72,0.9)] to-black opacity-90"
+></div>
+<img
+    className="absolute top-5 right-5 z-20 w-20 h-20 md:w-32 md:h-32"
+    src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
+    alt="Growth Suite Logo"
+  />
       </div>
       <div className="h-full flex px-6 items-center justify-center bg-white">
         <form onSubmit={handleLogin} className="bg-white p-6 rounded w-full">
-          <h2 className="text-2xl font-bold mb-4 text-center">ErpRestaurant</h2>
-          <h2 className="text-sm font-bold mb-4">Login</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">GROWTHSUITE</h2>
+          {/* <h2 className="text-sm font-bold mb-4">Iniciar sesión</h2> */}
           {error ? (
             <h1 className="border p-2 border-red-500 text-red-500 rounded-full">
               {error}
@@ -76,7 +83,7 @@ const Login = () => {
             </div>
           </div>
           <label htmlFor="usuario" className="text-sm text-gray-500">
-            Password
+            Contraseña
           </label>
           <div className="flex items-start relative">
             <div className="bg-gray-100  h-auto p-2">
@@ -86,7 +93,7 @@ const Login = () => {
               type={viewPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              placeholder="Contraseña"
               className="w-full p-2 border mb-4 bg-gray-200 text-gray-900 text-sm rounded"
               required
             />
@@ -101,20 +108,20 @@ const Login = () => {
             type="submit"
             className="w-full bg-dark-purple text-white p-2 rounded"
           >
-            Login
+            Iniciar sesión
           </button>
           <Link
             to={"/login/identy"}
             className="text-center flex justify-center text-gray-500 text-sm w-full my-4"
           >
-            Olvide la Contraseña
+            Olvidé la Contraseña
           </Link>
-          <Link
+          {/* <Link
             to={"/termandpolicies"}
             className="text-center font-bold flex justify-center text-gray-500 text-sm w-full my-4"
           >
             Términos y Políticas
-          </Link>
+          </Link> */}
         </form>
       </div>
     </div>
