@@ -231,10 +231,10 @@ const Usuarios = () => {
   //   }
   // };
   // console.log(businessActive);
-  // const buscarEmpresaId = (id) => {
-  //   const search = business.find((b) => b.id === id);
-  //   return search.nombre_razon;
-  // };
+  const buscarEmpresaId = (id) => {
+    const search = business.find((b) => b.id === id);
+    return search.nombre_razon;
+  };
   // useEffect(() => {
   //   // eslint-disable-next-line
   //   buscarEmpresas();
