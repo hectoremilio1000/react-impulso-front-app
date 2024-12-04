@@ -1,5 +1,4 @@
 import React from "react";
-import "./App.css";
 import {
   BrowserRouter as Router,
   Route,
@@ -9,117 +8,61 @@ import {
 import { AuthProvider } from "./components/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
-import Modules from "./pages/superadmin/Modules";
-import Plans from "./pages/superadmin/Plans";
-import Usuarios from "./pages/superadmin/Usuarios";
-import UsuariosAdmin from "./pages/admin/UsuariosAdmin";
-import Layout from "./components/rolSuperAdmin/Layout";
-import Dashboard from "./pages/superadmin/Dashboard";
-import Empresas from "./pages/superadmin/Empresas";
-
-import Prospects from "./pages/superadmin/Prospects";
-import LayoutAdmin from "./components/rolAdmin/Layout";
 import Manage from "./pages/admin/Manage";
-import DashboardAdmin from "./pages/admin/DashboardAdmin";
+import HumanResources from "./pages/admin/modules/HumanResources";
+import Inventory from "./pages/admin/modules/Inventory";
+import Sales from "./pages/admin/modules/Sales";
 import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
+          {/* Ruta de Login */}
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* RUTAS PARA USUARIO ADMIN */}
-          <Route
-            path="manage/:companyId/sede/:idSede"
-            element={
-              <PrivateRoute roles={["admin"]}>
-                <LayoutAdmin></LayoutAdmin>
-              </PrivateRoute>
-            }
-          >
-            <Route index element={<DashboardAdmin />} />
-            <Route path="usuarios" element={<UsuariosAdmin />} />
-          </Route>
-
+          {/* Redirección predeterminada para /manage */}
           <Route
             path="/manage"
             element={
               <PrivateRoute roles={["admin"]}>
-                {/* <LayoutAdmin> */}
+                <Navigate to="/manage/1" replace />{" "}
+                {/* Redirige a una empresa específica */}
+              </PrivateRoute>
+            }
+          />
+
+          {/* Ruta para empresas sin sede seleccionada */}
+          <Route
+            path="/manage/:companyId"
+            element={
+              <PrivateRoute roles={["admin"]}>
                 <Manage />
-                {/* </LayoutAdmin> */}
               </PrivateRoute>
             }
           />
-          {/* RUTAS PARA USUARIO SUPERADMIN */}
+
+          {/* Ruta dinámica para Manage */}
           <Route
-            path="/dashboard"
+            path="/manage/:companyId/sede/:idSede/*"
             element={
-              <PrivateRoute roles={["superadmin"]}>
-                <Layout>
-                  <Dashboard />
-                </Layout>
+              <PrivateRoute roles={["admin"]}>
+                <Manage />
               </PrivateRoute>
             }
-          />
-          <Route
-            path="/empresas"
-            element={
-              <PrivateRoute roles={["superadmin"]}>
-                <Layout>
-                  <Empresas />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/prospects"
-            element={
-              <PrivateRoute roles={["superadmin"]}>
-                <Layout>
-                  <Prospects />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/usuarios"
-            element={
-              <PrivateRoute roles={["superadmin"]}>
-                <Layout>
-                  <Usuarios />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/plans"
-            element={
-              <PrivateRoute roles={["superadmin"]}>
-                <Layout>
-                  <Plans />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/modules"
-            element={
-              <PrivateRoute roles={["superadmin"]}>
-                <Layout>
-                  <Modules />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
-          {/* RUTA DE FORBIDDEN */}
+          >
+            <Route path="human-resources" element={<HumanResources />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="sales" element={<Sales />} />
+          </Route>
+
+          {/* Página de error */}
           <Route path="/forbidden" element={<NotFoundPage />} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

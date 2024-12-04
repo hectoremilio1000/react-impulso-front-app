@@ -5,19 +5,34 @@ import { useAuth } from "./AuthContext";
 const PrivateRoute = ({ children, roles }) => {
   const { auth, loading } = useAuth();
 
-  if (!loading) {
-    if (!auth.user) {
-      // Si no está autenticado, redirige a la página de login
-      return <Navigate to="/login" />;
-    }
-
-    if (roles && !roles.includes(auth.user.rol.name)) {
-      // Si el usuario no tiene el rol adecuado, redirige a una página 403 o dashboard
-      return <Navigate to="/forbidden" />;
-    }
-
-    return children; // Si pasa todas las verificaciones, renderiza el componente
+  // Espera a que el contexto termine de cargar
+  if (loading) {
+    console.log("Esperando a que cargue el usuario...");
+    return <div>Cargando...</div>;
   }
+
+  // Verifica si el usuario está autenticado
+  if (!auth.user) {
+    console.log("Usuario no autenticado. Redirigiendo a /login.");
+    return <Navigate to="/login" />;
+  }
+
+  const userRole = auth.user.rol?.name; // Usa optional chaining para evitar errores
+  console.log("Rol del usuario:", userRole);
+  console.log("Roles permitidos para esta ruta:", roles);
+
+  // Valida el acceso basado en el rol
+  if (roles && (!userRole || !roles.includes(userRole))) {
+    console.log(
+      `Acceso denegado. Rol del usuario "${userRole}" no está en [${roles.join(
+        ", "
+      )}]`
+    );
+    return <Navigate to="/forbidden" />;
+  }
+
+  console.log("Acceso permitido. Renderizando componente.");
+  return children;
 };
 
 export default PrivateRoute;

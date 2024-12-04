@@ -1,130 +1,162 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { AiOutlineSearch } from "react-icons/ai";
 import { useAuth } from "../../components/AuthContext";
-import { FcBusiness } from "react-icons/fc";
-import { Link } from "react-router-dom";
+import { useNavigate, useParams, Outlet } from "react-router-dom";
+import { Layout, Menu, Button, Avatar, Dropdown } from "antd";
+import {
+  LogoutOutlined,
+  UserOutlined,
+  AppstoreOutlined,
+} from "@ant-design/icons";
+
+const { Header, Content, Sider } = Layout;
 
 const Manage = () => {
-  const { auth } = useAuth();
-  const [searchTerm, setSearchTerm] = useState("");
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const { auth, logout } = useAuth();
+  const { companyId, idSede } = useParams();
+  const navigate = useNavigate();
+
+  const [modules, setModules] = useState([
+    { key: "human-resources", name: "Recursos Humanos" },
+    { key: "inventory", name: "Inventarios" },
+    { key: "sales", name: "Ventas" },
+  ]);
   const [companies, setCompanies] = useState([]);
-  const [filterCompanies, setFilterCompanies] = useState([]);
   const [sedes, setSedes] = useState([]);
-  const [selectCompany, setSelectCompany] = useState(null);
-  const handleSelectCompany = (id) => {
-    const company = filterCompanies.find((f) => f.id === id);
-    setSedes(company.sedes);
-    console.log(company.sedes);
-    setSelectCompany(id);
-  };
-  const searchCompanies = async () => {
+
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  const fetchCompanies = async () => {
     try {
       const response = await axios.get(`${apiUrl}/companies`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
+        headers: { Authorization: `Bearer ${auth.token}` },
       });
-      console.log(response);
       if (response.data.status === "success") {
         setCompanies(response.data.data);
-        setFilterCompanies(response.data.data);
-      } else {
-        console.log(response.data.message);
       }
     } catch (error) {
-      console.error("Error al obtener los modulos:", error);
+      console.error("Error al obtener las empresas:", error);
     }
   };
+
   useEffect(() => {
-    searchCompanies();
-  }, [apiUrl, auth]);
+    fetchCompanies();
+  }, []);
+
   useEffect(() => {
-    if (searchTerm === "") {
-      setFilterCompanies(companies);
+    const company = companies.find((c) => c.id === parseInt(companyId));
+    setSedes(company?.sedes || []);
+  }, [companyId, companies]);
+
+  const handleModuleSelect = (key) => {
+    if (idSede) {
+      navigate(`/manage/${companyId}/sede/${idSede}/${key}`);
     } else {
-      const companiesData = companies.filter((c) =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilterCompanies(companiesData);
+      alert("Por favor selecciona una sede para ver los módulos");
     }
-  }, [searchTerm]);
+  };
+
+  const handleSelectCompany = (id) => {
+    navigate(`/manage/${id}`);
+  };
+
+  const handleSelectSede = (id) => {
+    navigate(`/manage/${companyId}/sede/${id}`);
+  };
+
+  if (!companyId) {
+    return (
+      <Layout className="h-screen">
+        <Content className="flex items-center justify-center">
+          <h1 className="text-2xl font-bold">
+            Por favor selecciona una empresa
+          </h1>
+        </Content>
+      </Layout>
+    );
+  }
 
   return (
-    <div className="w-full bg-white">
-      <div className="w-full py-8 flex flex-col justify-center">
-        <div className="w-full max-w-[800px] mx-auto">
-          <h1 className="font-bold text-gray-600 mb-6 text-2xl">
-            Seleccione tu empresa
-          </h1>
-          <div className="search-hook flex-grow my-6">
-            <div className="inmocms-input bg-white border rounded border-gray-300 flex text-sm h-[46px] overflow-hidden font-normal">
-              <input
-                className="h-full px-[12px] w-full border-0 border-none focus:outline-none"
-                placeholder="Busca tus empresas"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                autoComplete="on"
-              />
-              <AiOutlineSearch className="h-full w-[24px] min-w-[24px] opacity-5 mx-[12px]" />
-            </div>
-          </div>
-          <div className="grid gap-4 grid-cols-2">
-            <div className="w-full">
-              <h1 className="mb-4 text-gray-700 text-lg font-bold">Empresas</h1>
-              <div className="mt-6 grid grid-cols-1">
-                {filterCompanies.length > 0 &&
-                  filterCompanies.map((c, index) => {
-                    return (
-                      <div
-                        onClick={() => handleSelectCompany(c.id)}
-                        key={index}
-                        className={`${
-                          selectCompany === c.id
-                            ? "border-dark-purple"
-                            : "border-transparent"
-                        } hover:border-dark-purple  border-[2px] cursor-pointer w-full bg-gray-100 shadow rounded px-3 py-2`}
-                      >
-                        <div className="flex w-full gap-3 items-center">
-                          <FcBusiness className="text-2xl" />
-                          <div className="w-full">
-                            <h1 className="font-bold text-gray-600 text-lg">
-                              {c.name}
-                            </h1>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-            <div className="w-full">
-              <h1 className="mb-4 text-gray-700 text-lg font-bold">Sedes</h1>
-              {selectCompany !== null ? (
-                <>
-                  {sedes.length > 0 &&
-                    sedes.map((s, index) => {
-                      return (
-                        <Link
-                          key={index}
-                          to={`/manage/${s.companyId}/sede/${s.id}`}
-                          className="cursor-pointer w-full bg-gray-100 shadow rounded px-3 py-2"
-                        >
-                          {s.name}
-                        </Link>
-                      );
-                    })}
-                </>
-              ) : (
-                <p>Debes seleccionar una empresa</p>
-              )}
-            </div>
+    <Layout className="h-screen">
+      <Header className="bg-white shadow-md flex justify-between items-center px-6">
+        <div className="flex items-center gap-4">
+          <Avatar
+            icon={<UserOutlined />}
+            size="large"
+            style={{ backgroundColor: "#1890ff" }}
+          />
+          <div>
+            <p className="m-0 text-gray-800 font-semibold">
+              {auth.user.name || "Usuario"}
+            </p>
           </div>
         </div>
-      </div>
-    </div>
+        <div className="flex items-center gap-4">
+          <Dropdown
+            overlay={
+              <Menu>
+                <Menu.ItemGroup title="Empresas">
+                  {companies.map((company) => (
+                    <Menu.Item
+                      key={company.id}
+                      onClick={() => handleSelectCompany(company.id)}
+                    >
+                      {company.name}
+                    </Menu.Item>
+                  ))}
+                </Menu.ItemGroup>
+                {companyId && (
+                  <Menu.ItemGroup title="Sedes">
+                    {sedes.map((sede) => (
+                      <Menu.Item
+                        key={sede.id}
+                        onClick={() => handleSelectSede(sede.id)}
+                      >
+                        {sede.name}
+                      </Menu.Item>
+                    ))}
+                  </Menu.ItemGroup>
+                )}
+              </Menu>
+            }
+          >
+            <Button icon={<AppstoreOutlined />}>
+              {idSede ? `Sede ${idSede}` : `Empresa ${companyId}`}
+            </Button>
+          </Dropdown>
+          <Button
+            type="primary"
+            danger
+            icon={<LogoutOutlined />}
+            onClick={logout}
+          >
+            Cerrar sesión
+          </Button>
+        </div>
+      </Header>
+      <Layout>
+        <Sider width={300} className="bg-gray-100">
+          <Menu
+            mode="inline"
+            selectedKeys={[window.location.pathname.split("/").pop()]}
+            onClick={({ key }) => handleModuleSelect(key)}
+          >
+            {modules.map((module) => (
+              <Menu.Item key={module.key}>{module.name}</Menu.Item>
+            ))}
+          </Menu>
+        </Sider>
+        <Content className="p-6">
+          {idSede ? (
+            <Outlet />
+          ) : (
+            <h1 className="text-gray-600">
+              Selecciona una sede para continuar.
+            </h1>
+          )}
+        </Content>
+      </Layout>
+    </Layout>
   );
 };
 

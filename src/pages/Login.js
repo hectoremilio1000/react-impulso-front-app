@@ -13,28 +13,31 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (auth.user) {
       const role = auth.user.rol.name; // Supongamos que el rol está en user.role
-      console.log(role);
+      console.log("Rol del usuario autenticado:", role);
       if (role === "superadmin") {
-        navigate("/usuarios"); // Redirigir a la ruta de usuarios
+        navigate("/dashboard"); // Redirigir a la ruta del dashboard
       } else if (role === "admin") {
         navigate("/manage"); // Redirigir al panel con módulos en formato grid
       } else {
-        navigate("/"); // Ruta por defecto
+        navigate("/"); // Ruta por defecto en caso de rol desconocido
       }
     }
   }, [auth.user, navigate]);
+
   const handleViewPassword = () => {
     setViewPassword(!viewPassword);
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await login(email, password);
     } catch (err) {
-      setError("Crendenciales invalidas");
+      setError("Credenciales inválidas");
     }
   };
 
@@ -46,19 +49,16 @@ const Login = () => {
           src="https://www.prosegur.com.pe/dam/jcr:b09e0c73-9185-469d-8e79-c315f0d344e6/admon%20restaurantes.jpg"
           alt=""
         />
-        <div
-  className="absolute inset-0 w-full z-50 bg-gradient-to-b from-[rgba(18,19,21,0.9)] via-[rgba(184,161,72,0.9)] to-black opacity-90"
-></div>
-<img
-    className="absolute top-5 right-5 z-20 w-20 h-20 md:w-32 md:h-32"
-    src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
-    alt="Growth Suite Logo"
-  />
+        <div className="absolute inset-0 w-full z-50 bg-gradient-to-b from-[rgba(18,19,21,0.9)] via-[rgba(184,161,72,0.9)] to-black opacity-90"></div>
+        <img
+          className="absolute top-5 right-5 z-20 w-20 h-20 md:w-32 md:h-32"
+          src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
+          alt="Growth Suite Logo"
+        />
       </div>
       <div className="h-full flex px-6 items-center justify-center bg-white">
         <form onSubmit={handleLogin} className="bg-white p-6 rounded w-full">
           <h2 className="text-2xl font-bold mb-4 text-center">GROWTHSUITE</h2>
-          {/* <h2 className="text-sm font-bold mb-4">Iniciar sesión</h2> */}
           {error ? (
             <h1 className="border p-2 border-red-500 text-red-500 rounded-full">
               {error}
@@ -69,7 +69,7 @@ const Login = () => {
               Email
             </label>
             <div className="flex items-start">
-              <div className="bg-gray-100  h-auto p-2">
+              <div className="bg-gray-100 h-auto p-2">
                 <FaUserCircle className="text-lg text-gray-500" />
               </div>
               <input
@@ -86,7 +86,7 @@ const Login = () => {
             Contraseña
           </label>
           <div className="flex items-start relative">
-            <div className="bg-gray-100  h-auto p-2">
+            <div className="bg-gray-100 h-auto p-2">
               <RiLockPasswordLine className="text-lg text-gray-500" />
             </div>
             <input
@@ -98,7 +98,7 @@ const Login = () => {
               required
             />
             <div
-              onClick={() => handleViewPassword()}
+              onClick={handleViewPassword}
               className="absolute right-0 top-0 cursor-pointer p-2"
             >
               {viewPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
@@ -116,12 +116,6 @@ const Login = () => {
           >
             Olvidé la Contraseña
           </Link>
-          {/* <Link
-            to={"/termandpolicies"}
-            className="text-center font-bold flex justify-center text-gray-500 text-sm w-full my-4"
-          >
-            Términos y Políticas
-          </Link> */}
         </form>
       </div>
     </div>
