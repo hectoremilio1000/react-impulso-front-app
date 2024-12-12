@@ -87,13 +87,13 @@ const Sidebar = ({ open, setOpen }) => {
           {open ? (
             <img
               className="h-[50px] mx-auto object-contain block"
-              src="./logoapp.png"
+              src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
               alt=""
             />
           ) : (
             <img
               className="h-[50px] object-contain block"
-              src="./iconapp.png"
+              src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
               alt=""
             />
             // <img className="w-[80px]" src="./iconapp.png" alt="" />

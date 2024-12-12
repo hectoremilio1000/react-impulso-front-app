@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import { FaUserCircle } from "react-icons/fa";
 import { RiLockPasswordLine } from "react-icons/ri";
-import { BsViewList } from "react-icons/bs";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const Login = () => {
@@ -31,10 +30,15 @@ const Login = () => {
   };
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(null); // Resetear el estado del error antes de intentar iniciar sesión
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      if (!result.success) {
+        setError(result.message); // Mostrar el mensaje de error específico
+      }
     } catch (err) {
-      setError("Crendenciales invalidas");
+      console.error("Error inesperado al iniciar sesión:", err);
+      setError("Ocurrió un error inesperado. Intente nuevamente.");
     }
   };
 
@@ -46,14 +50,12 @@ const Login = () => {
           src="https://www.prosegur.com.pe/dam/jcr:b09e0c73-9185-469d-8e79-c315f0d344e6/admon%20restaurantes.jpg"
           alt=""
         />
-        <div
-  className="absolute inset-0 w-full z-50 bg-gradient-to-b from-[rgba(18,19,21,0.9)] via-[rgba(184,161,72,0.9)] to-black opacity-90"
-></div>
-<img
-    className="absolute top-5 right-5 z-20 w-20 h-20 md:w-32 md:h-32"
-    src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
-    alt="Growth Suite Logo"
-  />
+        <div className="absolute inset-0 w-full z-50 bg-gradient-to-b from-[rgba(18,19,21,0.9)] via-[rgba(184,161,72,0.9)] to-black opacity-90"></div>
+        <img
+          className="absolute top-5 right-5 z-20 w-20 h-20 md:w-32 md:h-32"
+          src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
+          alt="Growth Suite Logo"
+        />
       </div>
       <div className="h-full flex px-6 items-center justify-center bg-white">
         <form onSubmit={handleLogin} className="bg-white p-6 rounded w-full">

@@ -22,6 +22,7 @@ import LayoutAdmin from "./components/rolAdmin/Layout";
 import Manage from "./pages/admin/Manage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import NotFoundPage from "./pages/NotFoundPage";
+import Identy from "./pages/Identy";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/login/identy" element={<Identy />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
 
           {/* RUTAS PARA USUARIO ADMIN */}
@@ -117,6 +119,7 @@ function App() {
           />
           {/* RUTA DE FORBIDDEN */}
           <Route path="/forbidden" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
     </AuthProvider>
