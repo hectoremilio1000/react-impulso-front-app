@@ -50,10 +50,18 @@ const DashboardAdmin = () => {
               return (
                 <div
                   key={index}
-                  className="cursor-pointer flex flex-col items-center justify-center"
+                  className="cursor-pointer flex flex-col items-center justify-start"
                 >
-                  <div className="w-16 p-4 bg-white h-16 mb-4"></div>
-                  <h1 className="text-lg font-bold text-gray-700">{m.name}</h1>
+                  <div className="w-20 h-20 rounded p-4 bg-white mb-4 hover:-translate-y-2 transition-all duration-200 shadow-md">
+                    <img
+                      className="h-full object-contain"
+                      src={`/modules/${m.name}.png`} // Ruta dinámica
+                      alt=""
+                    />
+                  </div>
+                  <h1 className="text-lg text-center font-bold text-gray-700 text-ellipsis w-full text-nowrap">
+                    {m.name}
+                  </h1>
                 </div>
               );
             })}

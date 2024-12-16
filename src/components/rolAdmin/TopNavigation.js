@@ -119,28 +119,6 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                 </Space>
               </a>
             </Dropdown>
-            {/* <div className="ml-3">
-              <div className="flex flex-col items-end">
-                <div>
-                  <button className="flex flex-row items-center outline-none">
-                    <div className="rounded-full flex justify-center items-center self-center border-2 border-gray-2 h-10 w-10 text-16 avatar-background">
-                      <span className="text-gray-2 text-sm font-semibold uppercase">
-                        VL
-                      </span>
-                    </div>
-                    <div className="flex flex-col ml-2 mr-1 text-left">
-                      <h3 className="text-sm font-semibold text-gray-2 -mb-1">
-                        {auth.user.nombre}
-                      </h3>
-                      <span className="text-gray-5 text-xs my-0">
-                        {auth.user.email}
-                      </span>
-                    </div>
-                    <i className="fas fa-chevron-down pl-7 text-gray-5 text-12 border-gray-2"></i>
-                  </button>
-                </div>
-              </div>
-            </div> */}
           </div>
         </div>
         <div className="flex ">

@@ -52,6 +52,64 @@ const Plans = () => {
       }
     });
   };
+  const [modulesInitEdit, setModulesInitEdit] = useState([]); // Módulos iniciales cargados
+  const [addModules, setAddModules] = useState([]); // Módulos a agregar
+  const [removeModules, setRemoveModules] = useState([]); // Módulos a eliminar
+
+  const handleSelectModulesEdit = (moduleId, e) => {
+    e.stopPropagation(); // Evitar conflictos de eventos
+
+    setPlanEdit((prevPlanEdit) => {
+      const isSelected = prevPlanEdit.modules.some(
+        (module) => module.id === moduleId
+      );
+      const module = modulos.find((module) => module.id === moduleId); // Buscar el módulo
+
+      if (isSelected) {
+        // Si está seleccionado y lo deseleccionamos
+        // Verificar si estaba inicialmente cargado
+        if (modulesInitEdit.some((mod) => mod.id === moduleId)) {
+          // Si estaba en `modulesInitEdit`, agregarlo a `removeModules`
+          setRemoveModules((prevRemove) =>
+            prevRemove.some((mod) => mod.id === moduleId)
+              ? prevRemove
+              : [...prevRemove, module]
+          );
+        } else {
+          // Si no estaba inicialmente, eliminarlo de `addModules`
+          setAddModules((prevAdd) =>
+            prevAdd.filter((mod) => mod.id !== moduleId)
+          );
+        }
+      } else {
+        // Si no está seleccionado y lo seleccionamos
+        // Verificar si estaba inicialmente cargado
+        if (modulesInitEdit.some((mod) => mod.id === moduleId)) {
+          // Si estaba en `modulesInitEdit`, eliminarlo de `removeModules`
+          setRemoveModules((prevRemove) =>
+            prevRemove.filter((mod) => mod.id !== moduleId)
+          );
+        } else {
+          // Si no estaba inicialmente, agregarlo a `addModules`
+          setAddModules((prevAdd) =>
+            prevAdd.some((mod) => mod.id === moduleId)
+              ? prevAdd
+              : [...prevAdd, module]
+          );
+        }
+      }
+
+      // Actualizar los módulos seleccionados en `planEdit.modules`
+      const updatedModules = isSelected
+        ? prevPlanEdit.modules.filter((module) => module.id !== moduleId) // Remover módulo
+        : [...prevPlanEdit.modules, module]; // Agregar módulo
+
+      return {
+        ...prevPlanEdit,
+        modules: updatedModules,
+      };
+    });
+  };
 
   // creacion de planes estados
   const [plans, setPlans] = useState([]);
@@ -355,12 +413,16 @@ const Plans = () => {
     const token = auth.token;
 
     try {
-      const response = await axios.post(`${apiUrl}/plans`, newPlan, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.put(
+        `${apiUrl}/plans/${newPlan.id}`,
+        newPlan,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response);
       return response.data; // Simplemente devuelve los datos
     } catch (error) {
@@ -369,24 +431,26 @@ const Plans = () => {
     }
   };
   const handleOkEdit = async () => {
-    if (planCreate.name !== "" && planCreate.description !== "") {
-      setLoadingCreatePlan(true);
-      const newPlan = { ...planCreate, modules: selectModules };
+    if (planEdit.name !== "" && planEdit.description !== "") {
+      setLoadingEditPlan(true);
+      const newPlan = {
+        ...planEdit,
+        addModules: addModules,
+        removeModules: removeModules,
+      };
       console.log(newPlan);
 
       try {
-        const userData = await createPlan(newPlan);
+        const userData = await editPlan(newPlan);
         console.log(userData);
         if (userData.status === "success") {
-          setPlanCreate({
-            name: "",
-            description: "",
-            price: "",
-          });
-          setSelectModules([]);
-          setIsModalOpenCreate(false);
+          setPlanEdit(null);
+          setModulesInitEdit([]);
+          setAddModules([]);
+          setRemoveModules([]);
+          setIsModalOpenEdit(false);
           await buscarPlans();
-          setLoadingCreatePlan(false);
+          setLoadingEditPlan(false);
         } else {
           message.error(
             "Ocurrio un error al crear el modelo, intentelo mas tarde"
@@ -405,12 +469,16 @@ const Plans = () => {
   };
   const handleCancelEdit = () => {
     setPlanEdit(null);
+    setModulesInitEdit([]);
+    setAddModules([]);
+    setRemoveModules([]);
     setIsModalOpenEdit(false);
   };
   const abrirModalEdit = (e, id) => {
     e.stopPropagation();
     const planSearch = plans.find((p) => p.id === id);
     setPlanEdit(planSearch);
+    setModulesInitEdit(planSearch.modules);
     setIsModalOpenEdit(true);
   };
   const handleChangePlanEdit = (key, value) => {
@@ -420,6 +488,8 @@ const Plans = () => {
       return newModelo;
     });
   };
+  console.log(addModules);
+  console.log(removeModules);
 
   return (
     <div className="w-full p-6 app-container-sections">
@@ -639,19 +709,19 @@ const Plans = () => {
               {modulos.map((m, index) => {
                 return (
                   <div
-                    onClick={(e) => handleSelectModules(m.id, e)}
+                    onClick={(e) => handleSelectModulesEdit(m.id, e)}
                     key={index}
                     className={`w-full flex items-center  transition-all duration-300 p-4 rounded cursor-pointer ${
-                      planEdit?.modules.some((objeto) => objeto.id === m.id)
+                      planEdit?.modules?.some((objeto) => objeto.id === m.id)
                         ? "bg-dark-purple text-white"
                         : "bg-gray-100 text-gray-800 hover:bg-[#7f6bef]"
                     } shadow-sm 0 relative`}
                   >
                     <Checkbox
-                      checked={planEdit?.modules.some(
+                      checked={planEdit?.modules?.some(
                         (objeto) => objeto.id === m.id
                       )}
-                      onClick={(e) => handleSelectModules(m.id, e)}
+                      onClick={(e) => handleSelectModulesEdit(m.id, e)}
                       style={{ marginRight: "10px" }}
                     />
                     <h1 className="select-none">{m.name}</h1>
@@ -659,7 +729,7 @@ const Plans = () => {
                 );
               })}
             </div>
-            <span>{selectModules.length} modulos seleccionados</span>
+            <span>{planEdit?.modules?.length} modulos seleccionados</span>
           </div>
 
           <div className="flex justify-end mt-4">
