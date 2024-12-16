@@ -5,9 +5,10 @@ const GoogleAds = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
   useEffect(() => {
     axios
-      .get("http://localhost:3333/api/getAccounts", { withCredentials: true })
+      .get(`${apiUrl}api/getAccounts`, { withCredentials: true })
       .then((response) => {
         setAccounts(response.data ? response.data : []);
         setLoading(false);
@@ -18,7 +19,7 @@ const GoogleAds = () => {
   }, []);
 
   const handleConnect = () => {
-    window.location.href = "http://localhost:3333/api/googleautorize";
+    window.location.href = `${apiUrl}api/googleautorize`;
   };
 
   if (loading) {

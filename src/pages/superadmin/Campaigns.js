@@ -7,9 +7,10 @@ const Campaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
   useEffect(() => {
     axios
-      .get(`http://localhost:3333/api/getCampaigns/${accountId}`, {
+      .get(`${apiUrl}/api/getCampaigns/${accountId}`, {
         withCredentials: true,
       })
       .then((response) => {
