@@ -9,6 +9,7 @@ import { HiOutlineClipboardList } from "react-icons/hi";
 import { MdApps } from "react-icons/md";
 import { AiOutlineUser } from "react-icons/ai";
 import { FcBusiness, FcCustomerSupport } from "react-icons/fc";
+import { FaGoogle } from "react-icons/fa";
 
 const Sidebar = ({ open, setOpen }) => {
   const { auth } = useAuth();
@@ -40,6 +41,11 @@ const Sidebar = ({ open, setOpen }) => {
       is_title_head: true,
       title_head: "Clientes",
       items: [
+        {
+          title: "GoogleAds",
+          url: "/adsgoogle",
+          icon: <FaGoogle />,
+        },
         {
           title: "Empresas",
           url: "/empresas",
@@ -83,23 +89,27 @@ const Sidebar = ({ open, setOpen }) => {
           />
         )}
 
-        <div className="overflow-hidden px-2">
+        <div className="overflow-hidden">
           {open ? (
-            <img
-              className="h-[50px] mx-auto object-contain block"
-              src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
-              alt=""
-            />
+            <div className="flex items-center justify-center py-4 bg-dark-purple rounded">
+              <img
+                className="h-[50px] mx-auto object-contain block"
+                src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
+                alt=""
+              />
+            </div>
           ) : (
-            <img
-              className="h-[50px] object-contain block"
-              src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
-              alt=""
-            />
+            <div className="flex items-center justify-center py-4 bg-dark-purple rounded">
+              <img
+                className="h-[50px] mx-auto object-contain block"
+                src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
+                alt=""
+              />
+            </div>
             // <img className="w-[80px]" src="./iconapp.png" alt="" />
           )}
         </div>
-        <div className="w-full py-[20px] inline-flex items-center gap-2 px-2">
+        <div className="w-full py-[20px] inline-flex items-center gap-2 px-2 bg-gray-100 rounded">
           <img
             src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?size=338&ext=jpg&ga=GA1.1.1141335507.1718841600&semt=ais_user"
             className="w-6 h-6 rounded-full block cursor-pointer float-left mr-2 "

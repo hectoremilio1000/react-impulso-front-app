@@ -23,6 +23,8 @@ import Manage from "./pages/admin/Manage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import NotFoundPage from "./pages/NotFoundPage";
 import Identy from "./pages/Identy";
+import Campaigns from "./pages/superadmin/Campaigns";
+import GoogleAds from "./pages/superadmin/GoogleAds";
 
 function App() {
   return (
@@ -73,6 +75,26 @@ function App() {
               <PrivateRoute roles={["superadmin"]}>
                 <Layout>
                   <Empresas />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/adsgoogle"
+            element={
+              <PrivateRoute roles={["superadmin"]}>
+                <Layout>
+                  <GoogleAds />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/adsgoogle/account/:accountId/campaigns"
+            element={
+              <PrivateRoute roles={["superadmin"]}>
+                <Layout>
+                  <Campaigns />
                 </Layout>
               </PrivateRoute>
             }

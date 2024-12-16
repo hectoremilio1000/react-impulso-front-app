@@ -96,20 +96,24 @@ const Sidebar = ({ open, setOpen, idSede, companyId }) => {
 
         <div className="overflow-hidden px-2">
           {open ? (
-            <img
-              className="h-[50px] mx-auto object-contain block"
-              src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
-              alt=""
-            />
+            <div className="flex items-center justify-center py-4 bg-dark-purple rounded">
+              <img
+                className="h-[50px] mx-auto object-contain block"
+                src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
+                alt=""
+              />
+            </div>
           ) : (
-            <img
-              className="h-[50px] object-contain block"
-              src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
-              alt=""
-            />
+            <div className="flex items-center justify-center py-4 bg-dark-purple rounded">
+              <img
+                className="h-[50px] mx-auto object-contain block"
+                src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
+                alt=""
+              />
+            </div>
           )}
         </div>
-        <div className="w-full py-[20px] inline-flex items-center gap-2 px-2">
+        <div className="w-full py-[20px] inline-flex items-center gap-2 px-2 bg-gray-100 rounded">
           <img
             src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?size=338&ext=jpg&ga=GA1.1.1141335507.1718841600&semt=ais_user"
             className="w-6 h-6 rounded-full block cursor-pointer float-left mr-2 "
