@@ -10,7 +10,7 @@ const Campaigns = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   useEffect(() => {
     axios
-      .get(`${apiUrl}/api/getCampaigns/${accountId}`, {
+      .get(`${apiUrl}/getCampaigns/${accountId}`, {
         withCredentials: true,
       })
       .then((response) => {

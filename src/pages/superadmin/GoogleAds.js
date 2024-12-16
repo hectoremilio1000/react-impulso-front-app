@@ -8,7 +8,7 @@ const GoogleAds = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   useEffect(() => {
     axios
-      .get(`${apiUrl}api/getAccounts`, { withCredentials: true })
+      .get(`${apiUrl}/getAccounts`, { withCredentials: true })
       .then((response) => {
         setAccounts(response.data ? response.data : []);
         setLoading(false);
@@ -19,7 +19,7 @@ const GoogleAds = () => {
   }, []);
 
   const handleConnect = () => {
-    window.location.href = `${apiUrl}api/googleautorize`;
+    window.location.href = `${apiUrl}/googleautorize`;
   };
 
   if (loading) {
