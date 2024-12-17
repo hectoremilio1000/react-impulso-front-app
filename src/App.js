@@ -12,7 +12,6 @@ import Login from "./pages/Login";
 import Modules from "./pages/superadmin/Modules";
 import Plans from "./pages/superadmin/Plans";
 import Usuarios from "./pages/superadmin/Usuarios";
-import UsuariosAdmin from "./pages/admin/UsuariosAdmin";
 import Layout from "./components/rolSuperAdmin/Layout";
 import Dashboard from "./pages/superadmin/Dashboard";
 import Empresas from "./pages/superadmin/Empresas";
@@ -20,11 +19,11 @@ import Empresas from "./pages/superadmin/Empresas";
 import Prospects from "./pages/superadmin/Prospects";
 import LayoutAdmin from "./components/rolAdmin/Layout";
 import Manage from "./pages/admin/Manage";
-import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import NotFoundPage from "./pages/NotFoundPage";
 import Identy from "./pages/Identy";
 import Campaigns from "./pages/superadmin/Campaigns";
 import GoogleAds from "./pages/superadmin/GoogleAds";
+import ModuleRoutes from "./routes/modulesRoutes";
 
 function App() {
   return (
@@ -37,16 +36,13 @@ function App() {
 
           {/* RUTAS PARA USUARIO ADMIN */}
           <Route
-            path="manage/:companyId/sede/:idSede"
-            element={
-              <PrivateRoute roles={["admin"]}>
-                <LayoutAdmin></LayoutAdmin>
-              </PrivateRoute>
-            }
-          >
-            <Route index element={<DashboardAdmin />} />
-            <Route path="usuarios" element={<UsuariosAdmin />} />
-          </Route>
+            path="/manage/:companyId/sede/:idSede/*"
+            element={<ModuleRoutes />}
+          />
+          {/* <Route
+            path="/manage/:companyId/sede/:idSede/module/:idModulo/*"
+            element={<ModuleRoutes />}
+          /> */}
 
           <Route
             path="/manage"

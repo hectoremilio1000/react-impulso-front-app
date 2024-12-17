@@ -5,7 +5,7 @@ import { Outlet, useParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import axios from "axios";
 
-const LayoutAdmin = () => {
+const LayoutAdmin = ({ children }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const { auth } = useAuth();
   const [open, setOpen] = useState(true);
@@ -19,9 +19,9 @@ const LayoutAdmin = () => {
           Authorization: `Bearer ${auth.token}`,
         },
       });
-      console.log(response);
+
       const data = response.data;
-      console.log(data);
+
       if (data.status === "success") {
         setCompanies(data.data);
       } else {
@@ -32,7 +32,9 @@ const LayoutAdmin = () => {
     }
   };
   useEffect(() => {
-    buscar_empresas();
+    if (auth) {
+      buscar_empresas();
+    }
   }, [auth, apiUrl]);
 
   return (
@@ -45,7 +47,7 @@ const LayoutAdmin = () => {
           open={open}
           setOpen={setOpen}
         />
-        <Outlet />
+        {children}
       </div>
     </div>
   );

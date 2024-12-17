@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../components/AuthContext";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const DashboardAdmin = () => {
   const { auth } = useAuth();
   const apiUrl = process.env.REACT_APP_API_URL;
+
   const [modules, setModules] = useState([]);
   const [filterModules, setFilterModules] = useState([]);
   const searchPlan = async () => {
@@ -18,9 +20,8 @@ const DashboardAdmin = () => {
           },
         }
       );
-      console.log(response);
       const data = response.data;
-      console.log(data);
+
       if (data.status === "success") {
         setModules(data.data.plan.modules);
         setFilterModules(data.data.plan.modules);
@@ -32,8 +33,10 @@ const DashboardAdmin = () => {
     }
   };
   useEffect(() => {
-    searchPlan();
-  }, [apiUrl, auth.token]);
+    if (auth.user) {
+      searchPlan();
+    }
+  }, [apiUrl, auth]);
 
   return (
     <div className="w-full py-12">
@@ -48,7 +51,8 @@ const DashboardAdmin = () => {
           {filterModules.length > 0 &&
             filterModules.map((m, index) => {
               return (
-                <div
+                <Link
+                  to={`modules/${m.id}`}
                   key={index}
                   className="cursor-pointer flex flex-col items-center justify-start"
                 >
@@ -62,7 +66,7 @@ const DashboardAdmin = () => {
                   <h1 className="text-lg text-center font-bold text-gray-700 text-ellipsis w-full text-nowrap">
                     {m.name}
                   </h1>
-                </div>
+                </Link>
               );
             })}
         </div>
