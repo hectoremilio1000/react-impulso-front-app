@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
 import LayoutAdmin from "../components/rolAdmin/Layout";
 import SelectModuleRoute from "./selectModuleRoute";
+import PrivateRoute from "../components/PrivateRoute";
 
 function ModuleRoutes() {
   return (
@@ -9,18 +10,22 @@ function ModuleRoutes() {
       <Route
         index
         element={
-          <LayoutAdmin>
-            <DashboardAdmin />
-          </LayoutAdmin>
+          <PrivateRoute roles={["admin"]}>
+            <LayoutAdmin>
+              <DashboardAdmin />
+            </LayoutAdmin>
+          </PrivateRoute>
         }
       />
       {/* Rutas dinámicas por módulo */}
       <Route
         path="modules/:idModulo/*"
         element={
-          <LayoutAdmin>
-            <SelectModuleRoute />
-          </LayoutAdmin>
+          <PrivateRoute roles={["admin"]}>
+            <LayoutAdmin>
+              <SelectModuleRoute />
+            </LayoutAdmin>
+          </PrivateRoute>
         }
       />
     </Routes>

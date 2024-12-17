@@ -146,15 +146,18 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
   const onMenuClick = ({ key }) => {
     switch (key) {
       case "2":
-        // handleProfile();
+        // handleCONFIG();
         break;
       case "3":
-        // handlePlan();
+        // handleProfile();
+        break;
+      case "4":
+        // handlePlans();
         break;
       case "4":
         // handleSettings();
         break;
-      case "5":
+      case "6":
         logout();
         break;
       default:
@@ -279,23 +282,23 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                     extra: "⌘P",
                   },
                   {
-                    key: "2",
+                    key: "3",
                     label: "Perfil",
                     icon: <FaUser />,
                     extra: "⌘P",
                   },
                   {
-                    key: "3",
+                    key: "4",
                     label: "Plan",
                     icon: <FaCalendarAlt />,
                   },
                   {
-                    key: "4",
+                    key: "5",
                     label: "Configuracion",
                     icon: <FaCog />,
                   },
                   {
-                    key: "5",
+                    key: "6",
                     label: "Cerrar Session",
                     icon: <FaLongArrowAltUp />,
                   },
