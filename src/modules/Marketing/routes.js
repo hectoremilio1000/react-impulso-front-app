@@ -5,6 +5,7 @@ import GoogleAds from "./pages/GoogleAds";
 import TiktokAds from "./pages/TiktokAds";
 import LayoutMarketing from "./components/Layout";
 import NotFoundPage from "../../pages/NotFoundPage";
+import Reservaciones from "./pages/Reservaciones";
 
 function MarketingRoutes() {
   return (
@@ -38,6 +39,14 @@ function MarketingRoutes() {
         element={
           <LayoutMarketing>
             <FacebookAds />
+          </LayoutMarketing>
+        }
+      />
+      <Route
+        path="/reservations"
+        element={
+          <LayoutMarketing>
+            <Reservaciones />
           </LayoutMarketing>
         }
       />

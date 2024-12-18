@@ -172,11 +172,11 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex gap-4 items-center w-54">
-              <img
+              {/* <img
                 className="w-10 object-cover "
                 src={`/modules/${module?.name}.png`}
                 alt=""
-              />
+              /> */}
               <p className="text-2xl font-bold text-nowrap text-ellipsis overflow-hidden">
                 {module?.name}
               </p>
@@ -238,7 +238,7 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
               {isOpen && (
                 <div
                   ref={modalRef}
-                  className="absolute right-0 mt-8 transform -translate-x-[100px] bg-white border border-gray-200 rounded-lg shadow-lg w-64"
+                  className="z-50 absolute right-0 mt-8 transform -translate-x-[100px] bg-white border border-gray-200 rounded-lg shadow-lg w-64"
                 >
                   <div className="p-4 grid grid-cols-3 gap-4">
                     {apps.length > 0 &&
@@ -248,11 +248,11 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                           key={app.id}
                           className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 rounded-lg p-2 transition"
                         >
-                          <img
+                          {/* <img
                             src={`/modules/${app?.name}.png`}
                             alt={app.name}
                             className="w-12 h-12 object-contain"
-                          />
+                          /> */}
                           <span className="text-xs text-gray-700 mt-2">
                             {app.name}
                           </span>

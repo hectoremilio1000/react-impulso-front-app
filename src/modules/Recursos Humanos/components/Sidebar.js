@@ -6,10 +6,11 @@ import {
   useResolvedPath,
 } from "react-router-dom";
 import { BsArrowLeftShort, BsArrowRightShort } from "react-icons/bs";
-import { FaFacebook, FaGoogle, FaTiktok } from "react-icons/fa";
+import { FaFacebook, FaGoogle, FaTiktok, FaUserCheck } from "react-icons/fa";
 import { FaCalendarWeek } from "react-icons/fa6";
+import { BiUserPlus } from "react-icons/bi";
 
-const SidebarMarketing = ({ open, setOpen }) => {
+const SidebarRecursosH = ({ open, setOpen }) => {
   const { companyId, idSede, idModulo } = useParams();
   const handlerSidebar = () => {
     setOpen(!open);
@@ -20,9 +21,9 @@ const SidebarMarketing = ({ open, setOpen }) => {
       is_title_head: false,
       items: [
         {
-          title: "GoogleAds",
-          url: `/manage/${companyId}/sede/${idSede}/modules/${idModulo}/googleads`,
-          icon: <FaGoogle />,
+          title: "Contratados",
+          url: `/manage/${companyId}/sede/${idSede}/modules/${idModulo}/contratados`,
+          icon: <FaUserCheck />,
         },
       ],
     },
@@ -30,33 +31,13 @@ const SidebarMarketing = ({ open, setOpen }) => {
       is_title_head: false,
       items: [
         {
-          title: "TiktokAds",
-          url: `/manage/${companyId}/sede/${idSede}/modules/${idModulo}/tiktokads`,
-          icon: <FaTiktok />,
+          title: "Candidatos",
+          url: `/manage/${companyId}/sede/${idSede}/modules/${idModulo}/candidatos`,
+          icon: <BiUserPlus />,
         },
       ],
     },
 
-    {
-      is_title_head: false,
-      items: [
-        {
-          title: "FacebookAds",
-          url: `/manage/${companyId}/sede/${idSede}/modules/${idModulo}/facebookads`,
-          icon: <FaFacebook />,
-        },
-      ],
-    },
-    {
-      is_title_head: false,
-      items: [
-        {
-          title: "Reservaciones",
-          url: `/manage/${companyId}/sede/${idSede}/modules/${idModulo}/reservations`,
-          icon: <FaCalendarWeek />,
-        },
-      ],
-    },
     // {
     //   is_title_head: true,
     //   title_head: "Opciones",
@@ -148,4 +129,4 @@ const SidebarMarketing = ({ open, setOpen }) => {
   );
 };
 
-export default SidebarMarketing;
+export default SidebarRecursosH;
