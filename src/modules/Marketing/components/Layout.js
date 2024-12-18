@@ -7,7 +7,7 @@ const LayoutMarketing = ({ children }) => {
     <div className="flex">
       <SidebarMarketing open={open} setOpen={setOpen} />
       <div className="w-full app-container">
-        <div className="p-6">{children}</div>
+        <div className="w-full p-6 app-container-sections">{children}</div>
       </div>
     </div>
   );

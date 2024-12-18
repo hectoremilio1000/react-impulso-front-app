@@ -66,7 +66,7 @@ const SidebarMarketing = ({ open, setOpen }) => {
   const CustomNavLink = ({ to, children }) => {
     // Utiliza useResolvedPath y useMatch para obtener la ruta exacta
     let resolved = useResolvedPath(to);
-    console.log(resolved);
+
     let match = useMatch({ path: resolved.pathname, end: true });
 
     return (
