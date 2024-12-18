@@ -172,11 +172,11 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex gap-4 items-center w-54">
-              {/* <img
+              <img
                 className="w-10 object-cover "
                 src={`/modules/${module?.name}.png`}
                 alt=""
-              /> */}
+              />
               <p className="text-2xl font-bold text-nowrap text-ellipsis overflow-hidden">
                 {module?.name}
               </p>
@@ -248,11 +248,11 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                           key={app.id}
                           className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 rounded-lg p-2 transition"
                         >
-                          {/* <img
+                          <img
                             src={`/modules/${app?.name}.png`}
                             alt={app.name}
                             className="w-12 h-12 object-contain"
-                          /> */}
+                          />
                           <span className="text-xs text-gray-700 mt-2">
                             {app.name}
                           </span>
