@@ -8,7 +8,7 @@ import axios from "axios";
 const LayoutAdmin = ({ children }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const { auth } = useAuth();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const { idSede, companyId } = useParams();
   const [companies, setCompanies] = useState([]);
   const buscar_empresas = async () => {
@@ -38,8 +38,8 @@ const LayoutAdmin = ({ children }) => {
   }, [auth, apiUrl]);
 
   return (
-    <div className="flex">
-      <div className="w-full app-container">
+    <div className="root-aplication">
+      <div className="app-main">
         <TopNavigation
           companies={companies}
           companyId={companyId}
@@ -47,7 +47,7 @@ const LayoutAdmin = ({ children }) => {
           open={open}
           setOpen={setOpen}
         />
-        {children}
+        {React.cloneElement(children, { open, setOpen })}
       </div>
     </div>
   );

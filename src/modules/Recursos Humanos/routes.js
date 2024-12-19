@@ -7,13 +7,13 @@ import Candidatos from "./pages/PorContratar";
 import CandidateExam from "./pages/CandidatosExam";
 import CandidateResults from "./pages/CandidatosResults";
 
-function RecursosHRoutes() {
+function RecursosHRoutes({ open, setOpen }) {
   return (
     <Routes>
       <Route
         index
         element={
-          <LayoutRecursosH>
+          <LayoutRecursosH open={open} setOpen={setOpen}>
             <Main />
           </LayoutRecursosH>
         }
@@ -21,7 +21,7 @@ function RecursosHRoutes() {
       <Route
         path="/contratados"
         element={
-          <LayoutRecursosH>
+          <LayoutRecursosH open={open} setOpen={setOpen}>
             <Contratados />
           </LayoutRecursosH>
         }
@@ -29,7 +29,7 @@ function RecursosHRoutes() {
       <Route
         path="/candidatos"
         element={
-          <LayoutRecursosH>
+          <LayoutRecursosH open={open} setOpen={setOpen}>
             <Candidatos />
           </LayoutRecursosH>
         }
@@ -37,7 +37,7 @@ function RecursosHRoutes() {
       <Route
         path="/candidatos/:id/examen"
         element={
-          <LayoutRecursosH>
+          <LayoutRecursosH open={open} setOpen={setOpen}>
             <CandidateExam />
           </LayoutRecursosH>
         }
@@ -45,7 +45,7 @@ function RecursosHRoutes() {
       <Route
         path="/candidatos/:id/resultados"
         element={
-          <LayoutRecursosH>
+          <LayoutRecursosH open={open} setOpen={setOpen}>
             <CandidateResults />
           </LayoutRecursosH>
         }

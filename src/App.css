@@ -1,9 +1,24 @@
+.root-aplication {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+}
+.app-main {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  flex-direction: column;
+}
 .app-container {
   display: flex;
-  flex-direction: column;
   flex-grow: 1;
-  max-height: 100vh;
-  overflow: hidden;
+  flex-shrink: 1;
+  min-width: 0;
+  flex-direction: column;
+  overflow-y: scroll;
 }
 .app-container-sections {
   flex-grow: 1;

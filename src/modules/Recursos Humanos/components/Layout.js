@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import SidebarMarketing from "./Sidebar";
 import SidebarRecursosH from "./Sidebar";
 
-const LayoutRecursos = ({ children }) => {
-  const [open, setOpen] = useState(true);
+const LayoutRecursos = ({ children, open, setOpen }) => {
   return (
-    <div className="flex">
+    <div className="flex overflow-hidden flex-grow-1">
       <SidebarRecursosH open={open} setOpen={setOpen} />
       <div className="w-full app-container">
-        <div className="w-full p-6 app-container-sections">{children}</div>
+        <div className="w-full">{children}</div>
       </div>
     </div>
   );

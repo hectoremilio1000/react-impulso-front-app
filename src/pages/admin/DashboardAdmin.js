@@ -39,7 +39,7 @@ const DashboardAdmin = () => {
   }, [apiUrl, auth]);
 
   return (
-    <div className="w-full py-12">
+    <div className="w-full py-12 px-6 app-container-sections">
       <div className="w-full max-w-[850px] mx-auto">
         <div className="w-full mb-8">
           <h1 className="text-2xl font-bold text-gray-700">
@@ -47,7 +47,7 @@ const DashboardAdmin = () => {
           </h1>
           <p className="text-lg">Ingresa a una app para interactuar</p>
         </div>
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
           {filterModules.length > 0 &&
             filterModules.map((m, index) => {
               return (
@@ -63,7 +63,7 @@ const DashboardAdmin = () => {
                       alt=""
                     />
                   </div>
-                  <h1 className="text-lg text-center font-bold text-gray-700 text-ellipsis w-full text-nowrap">
+                  <h1 className="text-lg text-center font-bold text-gray-700 text-ellipsis overflow-hidden w-full">
                     {m.name}
                   </h1>
                 </Link>

@@ -7,13 +7,13 @@ import LayoutMarketing from "./components/Layout";
 import NotFoundPage from "../../pages/NotFoundPage";
 import Reservaciones from "./pages/Reservaciones";
 
-function MarketingRoutes() {
+function MarketingRoutes({ open, setOpen }) {
   return (
     <Routes>
       <Route
         index
         element={
-          <LayoutMarketing>
+          <LayoutMarketing open={open} setOpen={setOpen}>
             <Main />
           </LayoutMarketing>
         }
@@ -21,7 +21,7 @@ function MarketingRoutes() {
       <Route
         path="/googleads"
         element={
-          <LayoutMarketing>
+          <LayoutMarketing open={open} setOpen={setOpen}>
             <GoogleAds />
           </LayoutMarketing>
         }
@@ -29,7 +29,7 @@ function MarketingRoutes() {
       <Route
         path="/tiktokads"
         element={
-          <LayoutMarketing>
+          <LayoutMarketing open={open} setOpen={setOpen}>
             <TiktokAds />
           </LayoutMarketing>
         }
@@ -37,7 +37,7 @@ function MarketingRoutes() {
       <Route
         path="/facebookads"
         element={
-          <LayoutMarketing>
+          <LayoutMarketing open={open} setOpen={setOpen}>
             <FacebookAds />
           </LayoutMarketing>
         }
@@ -45,7 +45,7 @@ function MarketingRoutes() {
       <Route
         path="/reservations"
         element={
-          <LayoutMarketing>
+          <LayoutMarketing open={open} setOpen={setOpen}>
             <Reservaciones />
           </LayoutMarketing>
         }

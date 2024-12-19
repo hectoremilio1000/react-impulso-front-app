@@ -1,6 +1,11 @@
 import dayjs from "dayjs";
 import React, { useEffect, useRef, useState } from "react";
-import { BsBellFill, BsGrid3X3, BsJustifyRight } from "react-icons/bs";
+import {
+  BsBellFill,
+  BsGrid3X3,
+  BsJustifyLeft,
+  BsJustifyRight,
+} from "react-icons/bs";
 
 import { useAuth } from "../AuthContext";
 import { Dropdown, Select, Space, Tooltip } from "antd";
@@ -147,6 +152,9 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
     switch (key) {
       case "2":
         // handleCONFIG();
+
+        navigate(`/manage/${companyId}/sede/${idSede}`, { replace: true });
+        // window.location.reload(); // Refresca la página
         break;
       case "3":
         // handleProfile();
@@ -173,16 +181,27 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
           <div className="flex items-center gap-4">
             <div className="flex gap-4 items-center w-54">
               <img
-                className="w-10 object-cover "
-                src={`/modules/${module?.name}.png`}
+                className="w-12 bg-dark-purple"
+                src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
                 alt=""
               />
-              <p className="text-2xl font-bold text-nowrap text-ellipsis overflow-hidden">
-                {module?.name}
-              </p>
+              {/* <h1 className="text-2xl">ErpRestaurant</h1> */}
+              <div className="w-[2px] bg-dark-purple h-6 rounded"></div>
+              {idModulo ? (
+                <>
+                  <img
+                    className="w-10 object-cover "
+                    src={`/modules/${module?.name}.png`}
+                    alt=""
+                  />
+                  <p className="text-2xl font-bold text-nowrap text-ellipsis overflow-hidden">
+                    {module?.name}
+                  </p>
+                </>
+              ) : null}
             </div>
             {/* Select de Companies */}
-            <div className="">
+            <div className="hidden md:block overflow-auto">
               <Select
                 placeholder="Seleccione una empresa"
                 value={selectedCompany}
@@ -198,7 +217,7 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
             </div>
 
             {/* Select de Sedes */}
-            <div className="">
+            <div className="hidden md:block overflow-auto">
               <Select
                 placeholder="Seleccione una sede"
                 value={selectedSede}
@@ -244,7 +263,8 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                     {apps.length > 0 &&
                       apps.map((app) => (
                         <Link
-                          to={`../modules/${app.id}`}
+                          onClick={() => setIsOpen(false)}
+                          to={`/manage/${companyId}/sede/${idSede}/modules/${app.id}`}
                           key={app.id}
                           className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 rounded-lg p-2 transition"
                         >
@@ -262,61 +282,59 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                 </div>
               )}
             </div>
-            <Dropdown
-              overlayClassName="w-[150px]"
-              trigger={"click"}
-              menu={{
-                items: [
-                  {
-                    key: "1",
-                    label: auth?.user?.name,
-                    disabled: true,
-                  },
-                  {
-                    type: "divider",
-                  },
-                  {
-                    key: "2",
-                    label: "Home",
-                    icon: <FaHouse />,
-                    extra: "⌘P",
-                  },
-                  {
-                    key: "3",
-                    label: "Perfil",
-                    icon: <FaUser />,
-                    extra: "⌘P",
-                  },
-                  {
-                    key: "4",
-                    label: "Plan",
-                    icon: <FaCalendarAlt />,
-                  },
-                  {
-                    key: "5",
-                    label: "Configuracion",
-                    icon: <FaCog />,
-                  },
-                  {
-                    key: "6",
-                    label: "Cerrar Session",
-                    icon: <FaLongArrowAltUp />,
-                  },
-                ],
-                onClick: onMenuClick,
-              }}
+            <Tooltip
+              title={
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Cuenta de GrogthSuite</p>
+                  <p className="text-sm">{auth?.user?.name}</p>
+                  <p className="text-sm text-gray-500">{auth?.user?.email}</p>
+                </div>
+              }
+              placement="topLeft"
             >
-              <Tooltip
-                title={
-                  <div className="text-left">
-                    <p className="font-semibold text-sm">
-                      Cuenta de GrogthSuite
-                    </p>
-                    <p className="text-sm">{auth?.user?.name}</p>
-                    <p className="text-sm text-gray-500">{auth?.user?.email}</p>
-                  </div>
-                }
-                placement="bottomRight"
+              <Dropdown
+                overlayClassName="w-[150px]"
+                trigger={"click"}
+                menu={{
+                  items: [
+                    {
+                      key: "1",
+                      label: auth?.user?.name,
+                      disabled: true,
+                    },
+                    {
+                      type: "divider",
+                    },
+                    {
+                      key: "2",
+                      label: "Home",
+                      icon: <FaHouse />,
+                      extra: "⌘P",
+                    },
+                    {
+                      key: "3",
+                      label: "Perfil",
+                      icon: <FaUser />,
+                      extra: "⌘P",
+                    },
+                    {
+                      key: "4",
+                      label: "Plan",
+                      icon: <FaCalendarAlt />,
+                    },
+                    {
+                      key: "5",
+                      label: "Configuracion",
+                      icon: <FaCog />,
+                    },
+                    {
+                      key: "6",
+                      label: "Cerrar Session",
+                      icon: <FaLongArrowAltUp />,
+                    },
+                  ],
+                  onClick: onMenuClick,
+                }}
               >
                 <img
                   src={
@@ -325,26 +343,65 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                   alt="User Profile"
                   className="bg-gray-100 w-10 h-10 rounded-full cursor-pointer hover:opacity-80"
                 />
-              </Tooltip>
-            </Dropdown>
+              </Dropdown>
+            </Tooltip>
           </div>
         </div>
         <div className="flex ">
           <span className="title text-18 lg:text-26"></span>
         </div>
       </div>
-      <div className="block md:hidden p-6">
-        {open ? (
-          <BsJustifyRight
-            onClick={() => setOpen(false)}
-            className="bg-white text-dark-purple rounded-full text-3xl border border-dark-purple cursor-pointer"
-          />
-        ) : (
-          <BsJustifyRight
-            onClick={() => setOpen(true)}
-            className="bg-white text-dark-purple text-3xl cursor-pointer"
-          />
-        )}
+      <div className="block md:hidden p-6 bg-white">
+        <div className="flex gap-4">
+          {open ? (
+            <>
+              <BsJustifyRight
+                onClick={() => setOpen(false)}
+                className="bg-white text-dark-purple rounded-full text-3xl cursor-pointer"
+              />
+            </>
+          ) : (
+            <>
+              <BsJustifyLeft
+                onClick={() => setOpen(true)}
+                className="bg-white text-dark-purple text-3xl cursor-pointer"
+              />
+              {/* Select de Companies */}
+            </>
+          )}
+          {/* Select de Companies */}
+          <div className="overflow-auto">
+            <Select
+              placeholder="Seleccione una empresa"
+              value={selectedCompany}
+              className="w-full"
+              onChange={handleCompanyChange}
+            >
+              {companies.map((company) => (
+                <Option key={company.id} value={company.id}>
+                  {company.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Select de Sedes */}
+          <div className="overflow-auto">
+            <Select
+              placeholder="Seleccione una sede"
+              value={selectedSede}
+              className="w-full"
+              onChange={handleSedeChange}
+              // disabled={!sedesList.length} // Deshabilita si no hay sedes disponibles
+            >
+              {sedesList.map((sede) => (
+                <Option key={sede.id} value={sede.id}>
+                  {sede.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </div>
       </div>
     </>
   );

@@ -4,16 +4,16 @@ import PuntoVentaRoutes from "../modules/PuntoVenta/routes";
 import MarketingRoutes from "../modules/Marketing/routes";
 import RecursosHRoutes from "../modules/Recursos Humanos/routes";
 
-function SelectModuleRoute() {
+function SelectModuleRoute({ open, setOpen }) {
   const { idModulo } = useParams();
   console.log("ID del módulo:", idModulo);
 
   // Mapeo de módulos a componentes de rutas
   const moduleRoutes = {
-    1: <MarketingRoutes />,
-    2: <SitioWebRoutes />,
-    3: <PuntoVentaRoutes />,
-    4: <RecursosHRoutes />,
+    1: <MarketingRoutes open={open} setOpen={setOpen} />,
+    2: <SitioWebRoutes open={open} setOpen={setOpen} />,
+    3: <PuntoVentaRoutes open={open} setOpen={setOpen} />,
+    4: <RecursosHRoutes open={open} setOpen={setOpen} />,
     // Agrega más módulos aquí
   };
 

@@ -84,6 +84,7 @@ const SidebarMarketing = ({ open, setOpen }) => {
     return (
       <NavLink
         to={to}
+        onClick={() => setOpen(false)}
         className={
           match
             ? "bg-light-purple text-dark-purple text-sm p-2 flex gap-3 items-center rounded duration-300 transition-all"

@@ -7,13 +7,13 @@ import LayoutSitioWeb from "./components/Layout";
 import Portada from "./pages/Portada";
 import Menu from "./pages/Menu";
 
-function SitioWebRoutes() {
+function SitioWebRoutes({ open, setOpen }) {
   return (
     <Routes>
       <Route
         index
         element={
-          <LayoutSitioWeb>
+          <LayoutSitioWeb open={open} setOpen={setOpen}>
             <Main />
           </LayoutSitioWeb>
         }
@@ -21,7 +21,7 @@ function SitioWebRoutes() {
       <Route
         path="/dashboard"
         element={
-          <LayoutSitioWeb>
+          <LayoutSitioWeb open={open} setOpen={setOpen}>
             <Dashboard />
           </LayoutSitioWeb>
         }
@@ -29,7 +29,7 @@ function SitioWebRoutes() {
       <Route
         path="/config"
         element={
-          <LayoutSitioWeb>
+          <LayoutSitioWeb open={open} setOpen={setOpen}>
             <Config />
           </LayoutSitioWeb>
         }
@@ -37,7 +37,7 @@ function SitioWebRoutes() {
       <Route
         path="/portada"
         element={
-          <LayoutSitioWeb>
+          <LayoutSitioWeb open={open} setOpen={setOpen}>
             <Portada />
           </LayoutSitioWeb>
         }
@@ -45,7 +45,7 @@ function SitioWebRoutes() {
       <Route
         path="/Menu"
         element={
-          <LayoutSitioWeb>
+          <LayoutSitioWeb open={open} setOpen={setOpen}>
             <Menu />
           </LayoutSitioWeb>
         }
