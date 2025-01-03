@@ -211,6 +211,15 @@ const Reservaciones = () => {
     getDataScheduleEvents();
   }, [selectedOption, nextPageToken, prevPageToken]);
 
+  const handleRedirect = () => {
+    const currentUrl = window.location.href;
+    const redirectUrl = encodeURIComponent(currentUrl);
+    console.log(
+      `${apiUrl}/oauth/calendly?userId=${auth.user.id}&redirect=${redirectUrl}`
+    );
+    window.location.href = `${apiUrl}/oauth/calendly?userId=${auth.user.id}&redirect=${redirectUrl}`;
+  };
+
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold">Reservaciones</h1>
@@ -363,7 +372,7 @@ const Reservaciones = () => {
         </div>
       ) : (
         <button
-          onClick={() => (window.location.href = `${apiUrl}/oauth/calendly`)}
+          onClick={() => handleRedirect()}
           // onClick={() => getAuthentication()}
         >
           Conectar con Calendly
