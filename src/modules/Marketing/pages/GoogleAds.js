@@ -5,6 +5,8 @@ import dayjs from "dayjs";
 import Chart from "chart.js/auto";
 
 import campaigns from "../data/datagoogleads.json";
+import { FaArrowDown } from "react-icons/fa";
+import { AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
 const data = campaigns.Sheet0;
 const GoogleAds = () => {
   const chartRef = useRef(null);
@@ -128,17 +130,31 @@ const GoogleAds = () => {
       },
     },
   };
+  const [showFilterDate, setShowFilterDate] = useState(false);
 
   return (
     <div>
-      <h1 className="font-bold">GoogleAds</h1>
-      <div className="w-full">
-        <h1>Data</h1>
-        <div className="container mx-auto p-6">
-          {/* Selector de rango de fechas */}
-          <div className="mb-6">
-            <Card>
-              <h3 className="mb-4">Selecciona un rango de fechas</h3>
+      <div className="flex justify-between">
+        <h1 className="font-bold">GoogleAds</h1>
+        {/* Selector de rango de fechas */}
+        <div className="mb-4 relative">
+          <div>
+            <h3
+              onClick={() => setShowFilterDate(!showFilterDate)}
+              className="mb-4 bg-white flex gap-3 items-center rounded shadow text-gray-900 hover:shadow-lg transition-all duration-300 cursor-pointer px-3 py-2 text-sm"
+            >
+              Selecciona un rango de fechas{" "}
+              {showFilterDate ? (
+                <AiFillCaretUp className="text-gray-900" />
+              ) : (
+                <AiFillCaretDown className="text-gray-900" />
+              )}
+            </h3>
+            <div
+              className={`${
+                showFilterDate ? "flex" : "hidden"
+              } absolute top-[105%] right-0 w-max`}
+            >
               <DatePicker.RangePicker
                 value={dateRange}
                 onChange={(dates) => setDateRange(dates)}
@@ -146,30 +162,37 @@ const GoogleAds = () => {
                 format="YYYY-MM-DD"
                 defaultValue={[dayjs().subtract(30, "day"), dayjs()]}
               />
-            </Card>
+            </div>
           </div>
+        </div>
+      </div>
+      <div className="w-full">
+        <div className="container mx-auto p-6 relative">
           <div className="grid grid-cols-4 gap-4 mb-6">
-            <Card bordered={false}>
-              <Statistic title="Total de Clics" value={totalClicks} />
-            </Card>
-            <Card bordered={false}>
-              <Statistic
-                title="Total de Conversiones"
-                value={totalConversions}
-              />
-            </Card>
-            <Card bordered={false}>
-              <Statistic
-                title="Total de Impresiones"
-                value={totalImpressions}
-              />
-            </Card>
-            <Card bordered={false}>
-              <Statistic
-                title="Costo Promedio/Conv."
-                value={`MXN ${avgCostPerConv.toFixed(2)}`}
-              />
-            </Card>
+            <div className="bg-blue-600 text-white rounded-md p-6 shadow-sm">
+              <span className="title ">Total de clicks</span>
+              <p className="text-3xl">
+                {Number(totalClicks).toLocaleString("en-US")}
+              </p>
+            </div>
+            <div className="bg-red-600 text-white rounded-md p-6 shadow-sm">
+              <span className="title ">Total de Impresioness</span>
+              <p className="text-3xl">
+                {Number(totalImpressions).toLocaleString("en-US")}
+              </p>
+            </div>
+            <div className="bg-green-600 text-white rounded-md p-6 shadow-sm">
+              <span className="title ">Total de Conversiones</span>
+              <p className="text-3xl">
+                {Number(totalConversions).toLocaleString("en-US")}
+              </p>
+            </div>
+            <div className="bg-white text-black rounded-md p-6 shadow-sm">
+              <span className="title ">Costo Promedio/Conv.</span>
+              <p className="text-3xl">
+                ${Number(avgCostPerConv).toLocaleString("en-US")}
+              </p>
+            </div>
           </div>
           {/* Gráficos */}
           {/* Aquí se renderiza el gráfico */}
