@@ -24,6 +24,10 @@ import Identy from "./pages/Identy";
 import Campaigns from "./pages/superadmin/Campaigns";
 import GoogleAds from "./pages/superadmin/GoogleAds";
 import ModuleRoutes from "./routes/modulesRoutes";
+import CasosEstudio from "./pages/superadmin/CasosEstudio";
+import Plan from "./pages/admin/Plan";
+import LlenarEncuestaProspect from "./pages/superadmin/LlenarEncuestaProspect";
+import Recomendaciones from "./pages/superadmin/Recomendaciones";
 
 function App() {
   return (
@@ -33,6 +37,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/login/identy" element={<Identy />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/encuestas/:id" element={<LlenarEncuestaProspect />} />
+          <Route path="/recomendaciones/:id" element={<Recomendaciones />} />
 
           {/* RUTAS PARA USUARIO ADMIN */}
           <Route
@@ -51,6 +57,16 @@ function App() {
                 {/* <LayoutAdmin> */}
                 <Manage />
                 {/* </LayoutAdmin> */}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/plan"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <LayoutAdmin>
+                  <Plan />
+                </LayoutAdmin>
               </PrivateRoute>
             }
           />
@@ -111,6 +127,16 @@ function App() {
               <PrivateRoute roles={["superadmin"]}>
                 <Layout>
                   <Usuarios />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/casosestudio"
+            element={
+              <PrivateRoute roles={["superadmin"]}>
+                <Layout>
+                  <CasosEstudio />
                 </Layout>
               </PrivateRoute>
             }

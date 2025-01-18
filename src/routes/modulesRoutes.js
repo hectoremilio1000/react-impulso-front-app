@@ -1,8 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
-import LayoutAdmin from "../components/rolAdmin/Layout";
 import SelectModuleRoute from "./selectModuleRoute";
 import PrivateRoute from "../components/PrivateRoute";
+import LayoutModules from "../components/rolAdmin/LayoutModules";
 
 function ModuleRoutes() {
   return (
@@ -11,9 +11,9 @@ function ModuleRoutes() {
         index
         element={
           <PrivateRoute roles={["admin"]}>
-            <LayoutAdmin>
+            <LayoutModules>
               <DashboardAdmin />
-            </LayoutAdmin>
+            </LayoutModules>
           </PrivateRoute>
         }
       />
@@ -22,9 +22,9 @@ function ModuleRoutes() {
         path="modules/:idModulo/*"
         element={
           <PrivateRoute roles={["admin"]}>
-            <LayoutAdmin>
+            <LayoutModules>
               <SelectModuleRoute />
-            </LayoutAdmin>
+            </LayoutModules>
           </PrivateRoute>
         }
       />

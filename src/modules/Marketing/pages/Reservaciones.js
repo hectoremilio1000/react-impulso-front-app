@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Select, Table, Tag } from "antd";
+import { Select } from "antd";
 import axios from "axios";
 import { useAuth } from "../../../components/AuthContext";
-import { Link } from "react-router-dom";
-import { BiCalendarAlt } from "react-icons/bi";
+import { Link, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 
 const Reservaciones = () => {
   const { auth } = useAuth();
+  const { companyId } = useParams();
   const [events, setEvents] = useState([]);
   const [pagination, setPagination] = useState({});
   const [popupOpen, setPopupOpen] = useState(false);
@@ -37,12 +37,15 @@ const Reservaciones = () => {
   useEffect(() => {
     const checkCalendlyAuth = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/calendly/status`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${auth.token}`,
-          },
-        });
+        const response = await axios.get(
+          `${apiUrl}/calendly/status?companyId=${companyId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
 
         if (response.data.isAuthenticated) {
           setIsAuthenticatedWithCalendly(true);
@@ -102,7 +105,6 @@ const Reservaciones = () => {
             },
           }
         );
-        console.log(response);
 
         setEvents([...response.data.data.collection]);
         setPagination(response.data.data.pagination);
@@ -121,7 +123,6 @@ const Reservaciones = () => {
             },
           }
         );
-        console.log(response);
 
         setEvents([...response.data.data.collection]);
         setPagination(response.data.data.pagination);
@@ -139,7 +140,6 @@ const Reservaciones = () => {
             },
           }
         );
-        console.log(response);
 
         setEvents([...response.data.data.collection]);
         setPagination(response.data.data.pagination);
@@ -154,7 +154,6 @@ const Reservaciones = () => {
             },
           }
         );
-        console.log(response);
 
         setEvents([...response.data.data.collection]);
         setPagination(response.data.data.pagination);
@@ -195,7 +194,6 @@ const Reservaciones = () => {
   };
 
   const handleSelectedOptionChange = (value) => {
-    console.log(value);
     setPaginationCount(0);
     setNextPageToken(false);
     setPrevPageToken(false);
@@ -214,10 +212,17 @@ const Reservaciones = () => {
   const handleRedirect = () => {
     const currentUrl = window.location.href;
     const redirectUrl = encodeURIComponent(currentUrl);
-    console.log(
-      `${apiUrl}/oauth/calendly?userId=${auth.user.id}&redirect=${redirectUrl}`
-    );
-    window.location.href = `${apiUrl}/oauth/calendly?userId=${auth.user.id}&redirect=${redirectUrl}`;
+
+    window.location.href = `${apiUrl}/oauth/calendly?userId=${auth.user.id}&companyId=${companyId}&redirect=${redirectUrl}`;
+  };
+  const handleChangeStatus = (status) => {
+    const statusChange =
+      status === "active"
+        ? "activo"
+        : status === "canceled"
+        ? "cancelado"
+        : "desactivado";
+    return statusChange.toUpperCase();
   };
 
   return (
@@ -249,11 +254,11 @@ const Reservaciones = () => {
                   <table className="w-full">
                     <thead>
                       <tr>
-                        <th className="p-3 text-start">Name</th>
-                        <th className="p-3 text-start">Date</th>
-                        <th className="p-3 text-start">Start Time</th>
-                        <th className="p-3 text-start">End Time</th>
-                        <th className="p-3 text-start">Status</th>
+                        <th className="p-3 text-start">Nombre</th>
+                        <th className="p-3 text-start">Fecha Reservada</th>
+                        <th className="p-3 text-start">Inicio de reunión</th>
+                        <th className="p-3 text-start">Fin de reunión</th>
+                        <th className="p-3 text-start">Estado</th>
                       </tr>
                     </thead>
                     <tbody className="text-sm">
@@ -277,11 +282,11 @@ const Reservaciones = () => {
                             {" "}
                             {event.status === "active" ? (
                               <span className="px-3 py-1 text-xs rounded-full border-[1px] border-green-500 text-green-500 bg-white">
-                                {event.status.toUpperCase()}
+                                {handleChangeStatus(event.status)}
                               </span>
                             ) : (
                               <span className="px-3 py-1 text-xs rounded-full border-[1px] border-red-500 text-red-500 bg-white">
-                                {event.status.toUpperCase()}
+                                {handleChangeStatus(event.status)}
                               </span>
                             )}
                           </td>
@@ -364,9 +369,9 @@ const Reservaciones = () => {
                 )}
               </>
             ) : (
-              <div style={{ textAlign: "center", paddingTop: "50" }}>{`${
-                user?.name.split(" ")[0]
-              } has no scheduled events`}</div>
+              <div
+                style={{ textAlign: "center", paddingTop: "50" }}
+              >{`has no scheduled events`}</div>
             )}
           </div>
         </div>

@@ -56,7 +56,7 @@ const DashboardAdmin = () => {
                   key={index}
                   className="cursor-pointer flex flex-col items-center justify-start"
                 >
-                  <div className="w-20 h-20 rounded p-4 bg-white mb-4 hover:-translate-y-2 transition-all duration-200 shadow-md">
+                  <div className="w-20 h-20 rounded p-4 bg-white mb-4 hover:-translate-y-2 transition-all duration-300 shadow-md">
                     <img
                       className="h-full object-contain"
                       src={`/modules/${m.name}.png`} // Ruta dinámica

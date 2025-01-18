@@ -38,6 +38,16 @@ const Sidebar = ({ open, setOpen }) => {
       ],
     },
     {
+      is_title_head: false,
+      items: [
+        {
+          title: "Casos de Estudio",
+          url: "/casosestudio",
+          icon: <AiOutlineUser />,
+        },
+      ],
+    },
+    {
       is_title_head: true,
       title_head: "Clientes",
       items: [

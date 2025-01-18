@@ -78,12 +78,12 @@ const TiktokAds = () => {
           },
         }
       );
-      console.log(response);
       if (response.data.status === "success") {
         setData(response.data.data);
         setFilterData(response.data.data);
       } else {
-        console.log(response.data.message);
+        setData([]);
+        setFilterData([]);
       }
     } catch (error) {
       console.error("Error al obtener los modulos:", error);

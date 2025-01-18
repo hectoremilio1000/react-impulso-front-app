@@ -1,16 +1,10 @@
-import dayjs from "dayjs";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  BsBellFill,
-  BsGrid3X3,
-  BsJustifyLeft,
-  BsJustifyRight,
-} from "react-icons/bs";
+import { BsJustifyLeft, BsJustifyRight } from "react-icons/bs";
 
 import { useAuth } from "../AuthContext";
-import { Dropdown, Select, Space, Tooltip } from "antd";
+import { Dropdown, Select, Tooltip } from "antd";
 import { FaHouse, FaUser } from "react-icons/fa6";
-import { FiChevronDown, FiGrid } from "react-icons/fi";
+import { FiGrid } from "react-icons/fi";
 import { FaCalendarAlt, FaCog, FaLongArrowAltUp } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -33,6 +27,7 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
   const [sedesList, setSedesList] = useState([]);
 
   // Lista de aplicaciones (nombre + imagen)
+  const [plan, setPlan] = useState(null);
   const [apps, setApps] = useState([]);
 
   const searchPlan = async () => {
@@ -49,6 +44,7 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
       const data = response.data;
 
       if (data.status === "success") {
+        setPlan(data.data.plan);
         setApps(data.data.plan.modules);
       } else {
         console.log(response.data.message);
@@ -62,32 +58,6 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
       searchPlan();
     }
   }, [apiUrl, auth]);
-
-  // buscar modulo activo
-  const searchModule = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/modules/${idModulo}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      const data = response.data;
-
-      if (data.status === "success") {
-        setModule(data.data);
-      } else {
-        console.log(response.data.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  useEffect(() => {
-    if (auth.token) {
-      searchModule();
-    }
-  }, [auth, idModulo]);
 
   // Función para abrir/cerrar el modal
   const toggleModal = () => {
@@ -108,46 +78,6 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
     };
   }, []);
 
-  useEffect(() => {
-    if (companies.length > 0) {
-      setSelectedCompany(Number(companyId));
-      const companyData = companies.find((c) => c.id === Number(companyId));
-      console.log(companyData);
-      if (companyData) {
-        setSedesList(companyData.sedes);
-        setSelectedSede(companyData.sedes[0].id); // Reinicia la sede seleccionada
-      }
-    }
-  }, [companyId, companies]);
-
-  // Manejar cambio de empresa
-  const handleCompanyChange = (newCompanyId) => {
-    const companyData = companies.find((c) => c.id === newCompanyId);
-    if (companyData) {
-      const firstSedeId = companyData.sedes[0]?.id || null;
-      setSelectedCompany(newCompanyId);
-      setSedesList(companyData.sedes);
-      setSelectedSede(firstSedeId);
-
-      // Actualiza la ruta con la nueva company y la primera sede
-      navigate(`/manage/${newCompanyId}/sede/${firstSedeId}`);
-      window.location.reload(); // Refresca la página
-    }
-  };
-
-  // Manejar cambio de sede
-  const handleSedeChange = (newSedeId) => {
-    setSelectedSede(newSedeId);
-
-    // Actualiza la ruta con la company actual y la nueva sede
-    navigate(`/manage/${selectedCompany}/sede/${newSedeId}`);
-    window.location.reload(); // Refresca la página
-  };
-  const transformarTexto = (texto) => {
-    // return texto.trim().toLowerCase().replace(/\s+/g, "-");
-    return texto.trim().toLowerCase().replace(/\s+/g, "-");
-  };
-
   const onMenuClick = ({ key }) => {
     switch (key) {
       case "2":
@@ -162,7 +92,7 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
       case "4":
         // handlePlans();
         break;
-      case "4":
+      case "5":
         // handleSettings();
         break;
       case "6":
@@ -173,7 +103,6 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
     }
   };
 
-  const last_conection = dayjs().format("DD/MM • HH:mm");
   return (
     <>
       <div className=" bg-white block px-6 py-3 border-solid border-b-2 border-gray-8">
@@ -185,52 +114,7 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
                 src="https://imagenesrutalab.s3.us-east-1.amazonaws.com/growthsuite/growthsuitelogoblanco.png"
                 alt=""
               />
-              {/* <h1 className="text-2xl">ErpRestaurant</h1> */}
-              <div className="w-[2px] bg-dark-purple h-6 rounded"></div>
-              {idModulo ? (
-                <>
-                  <img
-                    className="w-10 object-cover "
-                    src={`/modules/${module?.name}.png`}
-                    alt=""
-                  />
-                  <p className="text-2xl font-bold text-nowrap text-ellipsis overflow-hidden">
-                    {module?.name}
-                  </p>
-                </>
-              ) : null}
-            </div>
-            {/* Select de Companies */}
-            <div className="hidden md:block overflow-auto">
-              <Select
-                placeholder="Seleccione una empresa"
-                value={selectedCompany}
-                className="w-full"
-                onChange={handleCompanyChange}
-              >
-                {companies.map((company) => (
-                  <Option key={company.id} value={company.id}>
-                    {company.name}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-
-            {/* Select de Sedes */}
-            <div className="hidden md:block overflow-auto">
-              <Select
-                placeholder="Seleccione una sede"
-                value={selectedSede}
-                className="w-full"
-                onChange={handleSedeChange}
-                // disabled={!sedesList.length} // Deshabilita si no hay sedes disponibles
-              >
-                {sedesList.map((sede) => (
-                  <Option key={sede.id} value={sede.id}>
-                    {sede.name}
-                  </Option>
-                ))}
-              </Select>
+              <h1 className="text-2xl">Growthsuite</h1>
             </div>
           </div>
           <div className="flex justify-end gap-6 self-start">
@@ -243,45 +127,6 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
               </div>
             </div> */}
 
-            <div className="inline-block">
-              <Tooltip title="Growth Apps" placement="bottom">
-                <button
-                  onClick={toggleModal}
-                  className="flex items-center justify-center p-3 rounded-full bg-gray-200 hover:bg-gray-300 transition duration-200 shadow-md"
-                >
-                  <FiGrid className="text-xl text-gray-700" />
-                </button>
-              </Tooltip>
-
-              {/* Modal debajo del botón */}
-              {isOpen && (
-                <div
-                  ref={modalRef}
-                  className="z-50 absolute right-0 mt-8 transform -translate-x-[100px] bg-white border border-gray-200 rounded-lg shadow-lg w-64"
-                >
-                  <div className="p-4 grid grid-cols-3 gap-4">
-                    {apps.length > 0 &&
-                      apps.map((app) => (
-                        <Link
-                          onClick={() => setIsOpen(false)}
-                          to={`/manage/${companyId}/sede/${idSede}/modules/${app.id}`}
-                          key={app.id}
-                          className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 rounded-lg p-2 transition"
-                        >
-                          <img
-                            src={`/modules/${app?.name}.png`}
-                            alt={app.name}
-                            className="w-12 h-12 object-contain"
-                          />
-                          <span className="text-xs text-gray-700 mt-2">
-                            {app.name}
-                          </span>
-                        </Link>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
             <Tooltip
               title={
                 <div className="text-left">
@@ -369,38 +214,6 @@ const TopNavigation = ({ open, setOpen, idSede, companyId, companies }) => {
               {/* Select de Companies */}
             </>
           )}
-          {/* Select de Companies */}
-          <div className="overflow-auto">
-            <Select
-              placeholder="Seleccione una empresa"
-              value={selectedCompany}
-              className="w-full"
-              onChange={handleCompanyChange}
-            >
-              {companies.map((company) => (
-                <Option key={company.id} value={company.id}>
-                  {company.name}
-                </Option>
-              ))}
-            </Select>
-          </div>
-
-          {/* Select de Sedes */}
-          <div className="overflow-auto">
-            <Select
-              placeholder="Seleccione una sede"
-              value={selectedSede}
-              className="w-full"
-              onChange={handleSedeChange}
-              // disabled={!sedesList.length} // Deshabilita si no hay sedes disponibles
-            >
-              {sedesList.map((sede) => (
-                <Option key={sede.id} value={sede.id}>
-                  {sede.name}
-                </Option>
-              ))}
-            </Select>
-          </div>
         </div>
       </div>
     </>

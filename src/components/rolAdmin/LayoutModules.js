@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-
-import TopNavigation from "./TopNavigation";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import axios from "axios";
+import TopNavigationModules from "./ToNavigationModules";
 
-const LayoutAdmin = ({ children }) => {
+const LayoutModules = ({ children }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const { auth } = useAuth();
   const [open, setOpen] = useState(false);
@@ -40,7 +39,7 @@ const LayoutAdmin = ({ children }) => {
   return (
     <div className="root-aplication">
       <div className="app-main">
-        <TopNavigation
+        <TopNavigationModules
           companies={companies}
           companyId={companyId}
           idSede={idSede}
@@ -53,4 +52,4 @@ const LayoutAdmin = ({ children }) => {
   );
 };
 
-export default LayoutAdmin;
+export default LayoutModules;

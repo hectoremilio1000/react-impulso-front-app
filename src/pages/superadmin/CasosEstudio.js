@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../../components/AuthContext";
+import { MdAdd } from "react-icons/md";
 import {
+  Button,
   Checkbox,
+  DatePicker,
   Dropdown,
+  Input,
+  message,
   Modal,
   Select,
   Space,
-  DatePicker,
-  message,
 } from "antd";
 import LogoUpload from "../../components/LogoUpload";
 import { TbAdjustments, TbCaretDownFilled } from "react-icons/tb";
@@ -15,58 +19,30 @@ import { FiImage } from "react-icons/fi";
 import { BsViewList } from "react-icons/bs";
 import { Link, NavLink } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
-import dayjs from "dayjs";
-import { useAuth } from "../../components/AuthContext";
 import axios from "axios";
-import { MdAdd } from "react-icons/md";
+import dayjs from "dayjs";
 const { Option } = Select;
 const { RangePicker } = DatePicker;
-
-const Prospects = () => {
+const CasosEstudio = () => {
   const { auth } = useAuth();
-  const items = [
-    {
-      key: "1",
-      label: (
-        <p
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.antgroup.com"
-        >
-          Editar
-        </p>
-      ),
-    },
-  ];
-  // steps formulario
-  const [nowStep, setNowStep] = useState(1);
-  const handleNextSteps = () => {
-    setNowStep(nowStep + 1);
-  };
-  const handlePrevSteps = () => {
-    setNowStep(nowStep - 1);
-  };
-  const [prospects, setProspects] = useState([]);
-  const [filterProspects, setFilterProspects] = useState([]);
-  const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
-  const [loadingCreate, setLoadingCreate] = useState(false);
-  const [selectProspects, setSelectProspects] = useState(null);
-  const [prospectCreate, setProspectCreate] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    whatsapp: "",
-    status: "creado",
-  });
   const apiUrl = process.env.REACT_APP_API_URL;
 
-  const abrirModalCreate = (e) => {
-    e.stopPropagation();
-    setIsModalOpenCreate(true);
-  };
-  const buscar_prospects = async () => {
+  const [casosEstudio, setCasosEstudio] = useState([]);
+  const [filterCasosEstudio, setFilterCasosEstudio] = useState([]);
+  const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [casosCreate, setCasosCreate] = useState({
+    title: "",
+    description: "",
+    company_id: "",
+    resultados: "",
+    phone_contact: "",
+    user_id: null,
+  });
+
+  const buscar_casos = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/prospects`, {
+      const response = await axios.get(`${apiUrl}/successcases`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${auth.token}`,
@@ -76,8 +52,8 @@ const Prospects = () => {
       const data = response.data;
       console.log(data);
       if (data.status === "success") {
-        setProspects(data.data);
-        setFilterProspects(data.data);
+        setCasosEstudio(data.data);
+        setFilterCasosEstudio(data.data);
       } else {
         console.log(response.data.message);
       }
@@ -86,21 +62,27 @@ const Prospects = () => {
     }
   };
   useEffect(() => {
-    buscar_prospects();
+    buscar_casos();
   }, [auth, apiUrl]);
+
+  const abrirModalCreate = (e) => {
+    e.stopPropagation();
+    setIsModalOpenCreate(true);
+  };
 
   // ESTADOS PARA LA TABLA DINAMICA
   const [itemsPerPage, setItemsPerPage] = useState(10); //items por pagina
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [visibleProspects, setVisibleProspects] = useState([]);
+  const [visibleCasosEstudio, setVisibleCasosEstudio] = useState([]);
   const [activeFilter, setActiveFilter] = useState(false);
   const [filters, setFilters] = useState({
-    first_name: "",
-    last_name: "",
+    name: "",
     email: "",
-    whatsapp: "",
+    phone_contact: "",
+    website: "",
+    plans: [{ tipo: "Plan basico" }],
     created_at: [null, null],
   });
 
@@ -114,46 +96,20 @@ const Prospects = () => {
   };
   const applyFilters = () => {
     const regex = /^[a-zA-Z0-9\s]*$/; // Permite solo letras, números y espacios
-    const bol = regex.test(searchTerm) ? true : false;
-
+    const bol = regex.test(searchTerm) ? searchTerm : "";
     console.log(bol);
-    if (bol && filterProspects.length > 0) {
-      console.log(filterProspects);
-      const filteredBusiness = filterProspects.filter((prospect) => {
+
+    if (bol === "") {
+      const filteredCasosEstudio = filterCasosEstudio.filter((company) => {
         const searchRegex = new RegExp(searchTerm, "i");
 
-        const matchSearch = Object.values(prospect).some((value) =>
+        const matchSearch = Object.values(company).some((value) =>
           searchRegex.test(value.toString())
         );
 
-        const matchFilters =
-          (!filters.firstName || prospect.firstName === filters.firstName) &&
-          // (!filters.lastName || prospect.lastName === filters.lastName) &&
-          (!filters.email || prospect.lastName === filters.email) &&
-          (!filters.whatsapp || prospect.lastName === filters.whatsapp) &&
-          (!filters.created_at[0] ||
-            ((dayjs(prospect.created_at).isAfter(
-              filters.created_at[0],
-              "day"
-            ) ||
-              dayjs(prospect.created_at).isSame(
-                filters.created_at[0],
-                "day"
-              )) &&
-              (dayjs(prospect.created_at).isBefore(
-                filters.created_at[1],
-                "day"
-              ) ||
-                dayjs(prospect.created_at).isSame(
-                  filters.created_at[1],
-                  "day"
-                ))));
-
-        return matchSearch && matchFilters;
+        return matchSearch;
       });
-      console.log(filteredBusiness);
-      detectarTotalPages(filteredBusiness);
-      const objetosOrdenados = filteredBusiness.sort((a, b) =>
+      const objetosOrdenados = filteredCasosEstudio.sort((a, b) =>
         dayjs(b.fecha_created).isAfter(dayjs(a.fecha_created)) ? 1 : -1
       );
       const startIndex = (currentPage - 1) * itemsPerPage;
@@ -163,7 +119,9 @@ const Prospects = () => {
         startIndex + itemsPerPage
       );
 
-      setVisibleProspects(paginated);
+      setVisibleCasosEstudio(paginated);
+    } else {
+      setSearchTerm(bol);
     }
   };
 
@@ -186,51 +144,32 @@ const Prospects = () => {
 
     setSearchTerm("");
     setCurrentPage(1);
-    detectarTotalPages(filterProspects);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginated = filterProspects.slice(
+    const paginated = filterCasosEstudio.slice(
       startIndex,
       startIndex + itemsPerPage
     );
 
-    setVisibleProspects(paginated);
+    setVisibleCasosEstudio(paginated);
   };
   // useEffect para manejar el filtrado y paginación
   useEffect(() => {
     applyFilters(); // Aplicar filtro inicialmente
-  }, [filterProspects, currentPage, itemsPerPage, searchTerm]);
-  const verifyStatus = (status) => {
-    switch (status) {
-      case "creado":
-        return (
-          <div className="max-w-max px-3 py-2 text-sm font-bold rounded-full bg-green-600 text-white inline-bloc text-nowrap">
-            Creado
-          </div>
-        );
-        break;
-      case "register_chat":
-        return (
-          <div className="max-w-max px-3 py-2 text-sm font-bold rounded-full bg-green-600 text-white inline-bloc text-nowrap">
-            RegistradoChat
-          </div>
-        );
-        break;
-    }
-  };
+  }, [filterCasosEstudio, currentPage, itemsPerPage, searchTerm]);
 
   const handleCreateChange = (key, value) => {
-    setProspectCreate((prev) => {
-      const newProspect = { ...prev, [key]: value };
+    setCasosCreate((prev) => {
+      const newCase = { ...prev, [key]: value };
 
-      return newProspect;
+      return newCase;
     });
   };
 
-  const createProspect = async (newUser) => {
+  const createCasos = async (newUser) => {
     const token = auth.token;
 
     try {
-      const response = await axios.post(`${apiUrl}/prospects`, newUser, {
+      const response = await axios.post(`${apiUrl}/successcase`, newUser, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -243,38 +182,41 @@ const Prospects = () => {
       throw error; // Lanza el error para que pueda ser capturado en el llamado
     }
   };
+
   const handleOkCreate = async () => {
     setLoadingCreate(true);
 
-    const newProspect = { ...prospectCreate };
+    const newData = { ...casosCreate };
     try {
-      const userData = await createProspect(newProspect);
+      const userData = await createCasos(newData);
       console.log(userData);
 
+      message.success("Se ha creado al admin correctamente");
       if (userData.status === "success") {
-        message.success("Se creo correctamente al prospecto");
-        await buscar_prospects();
-        handleCancelCreate();
+        message.success("Se creo el caso con exito");
       } else {
-        message.error("Ocurrio un error al crear al prospecto");
+        message.error("Ocurrio un error al crear el usuario");
         setLoadingCreate(false);
       }
     } catch (error) {
-      message.error("Ocurrió un error durante la creación del prospecto");
+      message.error("Ocurrió un error durante la creación del cliente");
     } finally {
       setLoadingCreate(false);
     }
   };
   const handleCancelCreate = () => {
-    setProspectCreate({
-      first_name: "",
-      last_name: "",
+    setCasosCreate({
+      name: "",
       email: "",
-      whatsapp: "",
+      logo: "",
+      website: "",
+      phone_contact: "",
+      user_id: null,
     });
+    // setLogoFileEmpresa("");
     setIsModalOpenCreate(false);
   };
-  const handleEliminarProspects = async (id) => {
+  const handleEliminarBusiness = async (id) => {
     console.log(id);
     // let propiedad_id = id;
     // try {
@@ -285,6 +227,7 @@ const Prospects = () => {
     //   message.error("No se elimino la propiedad, hubo un error");
     // }
   };
+
   return (
     <div className="w-full p-6 app-container-sections">
       {/* modal create */}
@@ -292,8 +235,8 @@ const Prospects = () => {
         footer={null}
         title="Register"
         open={isModalOpenCreate}
-        // onOk={handleOkCreate}
-        onCancel={() => setIsModalOpenCreate(false)} // Cierra el modal al hacer clic en la "X"
+        onOk={handleOkCreate}
+        onCancel={handleCancelCreate}
       >
         <div className="relative w-full">
           {loadingCreate ? (
@@ -301,64 +244,92 @@ const Prospects = () => {
               Loading
             </div>
           ) : null}
-          <div className="w-full">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="">
-                <label htmlFor="" className="w-full">
-                  Nombres
+          <div className="w-full mb-4">
+            <div className="w-full">
+              <div className="w-full flex gap-4">
+                <h1 className="w-full">Datos del caso de estudio</h1>
+              </div>
+            </div>
+          </div>
+          <>
+            {/* <div>
+              <LogoUpload
+                setLogoFile={setLogoFileEmpresa}
+                logo={casosCreate.logo}
+                setLogo={(logo) =>
+                  setCasosCreate({ ...casosCreate, logo: logo })
+                }
+              />
+            </div> */}
+            <div className="model grid grid-cols-1 gap-3 mt-4 relative my-4">
+              <div>
+                <label className="text-sm w-full block font-medium mb-4 ">
+                  Title
                 </label>
                 <input
-                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
+                  placeholder="Ingresa el nombre del modulo"
+                  className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
                   type="text"
-                  onChange={(e) =>
-                    handleCreateChange("first_name", e.target.value)
-                  }
+                  value={casosCreate?.name}
+                  onChange={(e) => handleCreateChange("name", e.target.value)}
                 />
               </div>
-              <div className="">
-                <label htmlFor="" className="w-full">
-                  Apellidos
+              <div>
+                <label className="text-sm w-full block font-medium mb-4 ">
+                  Description
                 </label>
-                <input
-                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
+                <textarea
+                  placeholder="Ingresa el nombre del modulo"
+                  className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
                   type="text"
-                  onChange={(e) =>
-                    handleCreateChange("last_name", e.target.value)
-                  }
-                />
-              </div>
-              <div className="">
-                <label htmlFor="" className="w-full">
-                  Email
-                </label>
-                <input
-                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
-                  type="text"
+                  value={casosCreate?.email}
                   onChange={(e) => handleCreateChange("email", e.target.value)}
                 />
               </div>
-              <div className="">
-                <label htmlFor="" className="w-full">
-                  Whatsapp
+              <div>
+                <label className="text-sm w-full block font-medium mb-4 ">
+                  Empresa
+                </label>
+                <select
+                  placeholder="Ingresa el nombre del modulo"
+                  className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                  type="text"
+                  value={casosCreate?.email}
+                  onChange={(e) => handleCreateChange("email", e.target.value)}
+                >
+                  <option value="1">1</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm w-full block font-medium mb-4 ">
+                  Celular
                 </label>
                 <input
-                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
+                  placeholder="Ingresa el nombre del modulo"
+                  className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
                   type="text"
+                  value={casosCreate?.phone_contact}
                   onChange={(e) =>
-                    handleCreateChange("whatsapp", e.target.value)
+                    handleCreateChange("phone_contact", e.target.value)
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm w-full block font-medium mb-4 ">
+                  Sitio Web
+                </label>
+                <input
+                  placeholder="Ingresa el nombre del modulo"
+                  className="bg-gray-100 rounded px-3 py-2 w-full text-sm"
+                  type="text"
+                  value={casosCreate?.website}
+                  onChange={(e) =>
+                    handleCreateChange("website", e.target.value)
                   }
                 />
               </div>
             </div>
-            <div className="footerForm mt-4">
-              <button
-                className="px-3 py-2 bg-dark-purple text-white rounded"
-                onClick={() => handleOkCreate()}
-              >
-                Registrar
-              </button>
-            </div>
-          </div>
+          </>
         </div>
       </Modal>
       <div className="horizontal-options flex items-center mb-[24px]">
@@ -366,7 +337,7 @@ const Prospects = () => {
           <div className="inmocms-input bg-white border rounded border-gray-300 flex text-sm h-[46px] overflow-hidden font-normal">
             <input
               className="h-full px-[12px] w-full border-0 border-none focus:outline-none"
-              placeholder="Buscar prospectos"
+              placeholder="Buscar casos de estudio"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               autoComplete="on"
@@ -386,7 +357,7 @@ const Prospects = () => {
             className="btn-new ml-[12px] h-[46px] flex gap-2 items-center"
           >
             <MdAdd className="text-white" />
-            <span className="mobile-hide">Nuevo Prospecto</span>
+            <span className="mobile-hide">Nuevo Caso</span>
           </button>
         </div>
       </div>
@@ -440,30 +411,45 @@ const Prospects = () => {
         >
           <thead>
             <tr>
-              <td>Nombres </td>
-              <td>email </td>
-              <td>Whatsapp </td>
-              <td>Fecha creación</td>
-              <td>Estado</td>
+              <td align="center">Logo</td>
+              <td>Name </td>
+              <td>Admin </td>
+              <td>Plan </td>
+              <td>Estado </td>
+              <td>Renovacion </td>
               <td className="ajustes-tabla-celda">Acciones</td>
             </tr>
           </thead>
           <tbody>
-            {visibleProspects.length > 0 &&
-              visibleProspects.map((item, index) => {
+            {visibleCasosEstudio.length > 0 &&
+              visibleCasosEstudio.map((item, index) => {
                 return (
                   <tr className="" key={index}>
                     <td>
-                      <b>{item.firstName + " " + item.lastName || "N/A"}</b>
+                      <div
+                        className="w-8 h-8 object-contain"
+                        style={{
+                          backgroundImage: `url('${item.logo}')`,
+                          backgroundPosition: "center",
+                          backgroundSize: "contain",
+                        }}
+                      ></div>
                     </td>
-                    <td>{item.email}</td>
-                    <td>{item.whatsapp}</td>
+                    <td>{item.name}</td>
                     <td>
-                      {dayjs(item.createdAt)
-                        .locale("es")
-                        .format("DD MMMM YYYY HH:mm:ss")}
+                      <b>{item.admin.name}</b> <br /> {item.admin.email}
                     </td>
-                    <td>{verifyStatus(item.status)}</td>
+                    <td>
+                      {item.admin.subscriptions[0].plan.name} <br />{" "}
+                      {item.admin.subscriptions[0].plan.price}
+                    </td>
+                    <td>{item.admin.subscriptions[0].status}</td>
+                    <td>
+                      {dayjs(item.admin.subscriptions[0].endDate)
+                        .locale("es")
+                        .format("DD [de] MMMM [del] YYYY")}
+                    </td>
+
                     <td className="ajustes-tabla-celda">
                       <div className="ajustes-tabla-celda-item px-4">
                         <Dropdown
@@ -474,7 +460,7 @@ const Prospects = () => {
                               {
                                 label: (
                                   <Link
-                                    to={`/prospects/edit/${item.id}`}
+                                    to={`/companies/edit/${item.id}`}
                                     className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500"
                                   >
                                     <FaEdit /> Editar info
@@ -488,11 +474,11 @@ const Prospects = () => {
                                     onClick={() => {
                                       Modal.confirm({
                                         title:
-                                          "¿Está seguro de eliminar al prospecto?",
+                                          "¿Está seguro de eliminar la propiedad?",
                                         content:
-                                          "Al eliminar el prospecto, se eliminarán los datos relacionados como: respuestas de prefuntas",
+                                          "Al eliminar la propiedad, se eliminarán los datos relacionados con la propiedad como: modelos, unidades y contenido multimedia",
                                         onOk: () =>
-                                          handleEliminarProspects(item.id),
+                                          handleEliminarBusiness(item.id),
                                         okText: "Eliminar",
                                         cancelText: "Cancelar",
                                       });
@@ -503,6 +489,28 @@ const Prospects = () => {
                                   </button>
                                 ),
                                 key: 2,
+                              },
+                              {
+                                label: (
+                                  <Link
+                                    to={`/property/${item.id}/models`}
+                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500 "
+                                  >
+                                    <BsViewList /> Ver Modelos
+                                  </Link>
+                                ),
+                                key: 3,
+                              },
+                              {
+                                label: (
+                                  <Link
+                                    to={`/property/${item.id}/multimedia`}
+                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500 "
+                                  >
+                                    <FiImage /> Multimedia
+                                  </Link>
+                                ),
+                                key: 4,
                               },
                             ],
                           }}
@@ -625,4 +633,4 @@ const Prospects = () => {
   );
 };
 
-export default Prospects;
+export default CasosEstudio;
