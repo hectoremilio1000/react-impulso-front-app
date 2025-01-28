@@ -3,10 +3,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "dark-purple": "#330aee",
+        "dark-purple": "#000",
         "dark-blue": "#2251f8",
-        "dark-button": "#2251f8",
-        "light-purple": "#eae5ff",
+        "dark-button": "#a78b21",
+        "light-purple": "#ececec",
         "light-font": "#67728d",
         "bold-font": "#171b1e",
       },

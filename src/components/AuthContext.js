@@ -14,23 +14,70 @@ export const AuthProvider = ({ children }) => {
   });
 
   const login = async (email, password) => {
+<<<<<<< HEAD
     try {
       const config = {
         method: "post",
+        url: `${apiUrl}/login`,
+=======
+    try {
+      const config = {
+        method: "post",
+        maxBodyLength: Infinity,
         url: `${apiUrl}/login`,
         headers: {
           "Content-Type": "application/json",
         },
         data: JSON.stringify({ email, password }),
       };
-
       const response = await axios.request(config);
       const data = response.data;
 
       sessionStorage.setItem("token", data.token);
       await fetchMe(data.token);
+      return { success: true };
+    } catch (error) {
+      // Manejo detallado de errores
+      if (error.code === "ERR_NETWORK") {
+        return { success: false, message: "No se pudo conectar al servidor." };
+      } else if (error.response) {
+        // Error en la respuesta del servidor
+        return {
+          success: false,
+          message: error.response.data.message || "Error en las credenciales.",
+        };
+      } else {
+        return {
+          success: false,
+          message: "Error desconocido al iniciar sesión.",
+        };
+      }
+    }
+  };
+
+  const fetchMe = async (token) => {
+    try {
+      const config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: `${apiUrl}/me`,
+>>>>>>> main
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: JSON.stringify({ email, password }),
+      };
+      const response = await axios.request(config);
+      const data = response.data;
+<<<<<<< HEAD
+
+      sessionStorage.setItem("token", data.token);
+      await fetchMe(data.token);
 
       navigate("/dashboard");
+=======
+      setAuth({ ...auth, user: data.user, token });
+>>>>>>> main
     } catch (error) {
       console.error("Error durante el login:", error.response?.data || error);
       throw new Error("Credenciales inválidas");
@@ -68,8 +115,13 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     console.log("Cerrando sesión");
     sessionStorage.removeItem("token");
+<<<<<<< HEAD
     setAuth({ token: null, user: null });
     navigate("/login");
+=======
+    sessionStorage.removeItem("user");
+    setAuth({ token: null, user: null });
+>>>>>>> main
   };
 
   return (

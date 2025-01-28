@@ -209,6 +209,7 @@ const Usuarios = () => {
       ),
     },
   ];
+<<<<<<< HEAD
   const buscarEmpresas = async () => {
     try {
       const response = await axios.get(
@@ -231,14 +232,45 @@ const Usuarios = () => {
     }
   };
   console.log(businessActive);
+=======
+  // const buscarEmpresas = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${apiUrl}/businessbyuser/${session.id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${session.token}`,
+  //         },
+  //       }
+  //     );
+  //     let todas = { id: "Todas", nombre_razon: "Todas" };
+  //     //   setBusinessActive(response.data[0].id);
+  //     response.data.push(todas);
+  //     setBusinessActive(response.data[0].id);
+  //     setUsuarioCreate({ ...usuarioCreate, empresa_id: response.data[0].id });
+  //     console.log(response.data);
+  //     setBusiness(response.data);
+  //   } catch (error) {
+  //     console.error("Error al obtener las empresas:", error);
+  //   }
+  // };
+  // console.log(businessActive);
+>>>>>>> main
   const buscarEmpresaId = (id) => {
     const search = business.find((b) => b.id === id);
     return search.nombre_razon;
   };
+<<<<<<< HEAD
   useEffect(() => {
     // eslint-disable-next-line
     buscarEmpresas();
   }, [0]);
+=======
+  // useEffect(() => {
+  //   // eslint-disable-next-line
+  //   buscarEmpresas();
+  // }, [0]);
+>>>>>>> main
   const buscarUsuarios = async () => {
     try {
       const response = await axios.get(`${apiUrl}/users`, {

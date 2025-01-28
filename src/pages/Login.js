@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import { FaUserCircle } from "react-icons/fa";
 import { RiLockPasswordLine } from "react-icons/ri";
-import { BsViewList } from "react-icons/bs";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const Login = () => {
@@ -34,10 +33,19 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(null); // Resetear el estado del error antes de intentar iniciar sesión
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      if (!result.success) {
+        setError(result.message); // Mostrar el mensaje de error específico
+      }
     } catch (err) {
+<<<<<<< HEAD
       setError("Credenciales inválidas");
+=======
+      console.error("Error inesperado al iniciar sesión:", err);
+      setError("Ocurrió un error inesperado. Intente nuevamente.");
+>>>>>>> main
     }
   };
 

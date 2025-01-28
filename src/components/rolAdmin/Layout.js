@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "./Sidebar";
+
 import TopNavigation from "./TopNavigation";
-import { Outlet, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import axios from "axios";
 
-const LayoutAdmin = () => {
+const LayoutAdmin = ({ children }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const { auth } = useAuth();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const { idSede, companyId } = useParams();
   const [companies, setCompanies] = useState([]);
   const buscar_empresas = async () => {
@@ -19,9 +19,9 @@ const LayoutAdmin = () => {
           Authorization: `Bearer ${auth.token}`,
         },
       });
-      console.log(response);
+
       const data = response.data;
-      console.log(data);
+
       if (data.status === "success") {
         setCompanies(data.data);
       } else {
@@ -32,12 +32,14 @@ const LayoutAdmin = () => {
     }
   };
   useEffect(() => {
-    buscar_empresas();
+    if (auth) {
+      buscar_empresas();
+    }
   }, [auth, apiUrl]);
 
   return (
-    <div className="flex">
-      <div className="w-full app-container">
+    <div className="root-aplication">
+      <div className="app-main">
         <TopNavigation
           companies={companies}
           companyId={companyId}
@@ -45,7 +47,7 @@ const LayoutAdmin = () => {
           open={open}
           setOpen={setOpen}
         />
-        <Outlet />
+        {React.cloneElement(children, { open, setOpen })}
       </div>
     </div>
   );

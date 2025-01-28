@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Checkbox, Dropdown, Modal, Select, Space, DatePicker } from "antd";
+import {
+  Checkbox,
+  Dropdown,
+  Modal,
+  Select,
+  Space,
+  DatePicker,
+  message,
+} from "antd";
 import LogoUpload from "../../components/LogoUpload";
 import { TbAdjustments, TbCaretDownFilled } from "react-icons/tb";
 import { FaEdit, FaEllipsisV, FaEye, FaTrash } from "react-icons/fa";
@@ -43,6 +51,13 @@ const Prospects = () => {
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [selectProspects, setSelectProspects] = useState(null);
+  const [prospectCreate, setProspectCreate] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    whatsapp: "",
+    status: "creado",
+  });
   const apiUrl = process.env.REACT_APP_API_URL;
 
   const abrirModalCreate = (e) => {
@@ -79,14 +94,13 @@ const Prospects = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [visibleEmpresas, setVisibleProspects] = useState([]);
+  const [visibleProspects, setVisibleProspects] = useState([]);
   const [activeFilter, setActiveFilter] = useState(false);
   const [filters, setFilters] = useState({
-    name: "",
+    first_name: "",
+    last_name: "",
     email: "",
-    phone_contact: "",
-    website: "",
-    plans: [{ tipo: "Plan basico" }],
+    whatsapp: "",
     created_at: [null, null],
   });
 
@@ -100,35 +114,44 @@ const Prospects = () => {
   };
   const applyFilters = () => {
     const regex = /^[a-zA-Z0-9\s]*$/; // Permite solo letras, números y espacios
-    const bol = regex.test(searchTerm) ? searchTerm : "";
-    console.log(bol);
+    const bol = regex.test(searchTerm) ? true : false;
 
-    if (bol === "") {
-      const filteredBusiness = filterProspects.filter((company) => {
+    console.log(bol);
+    if (bol && filterProspects.length > 0) {
+      console.log(filterProspects);
+      const filteredBusiness = filterProspects.filter((prospect) => {
         const searchRegex = new RegExp(searchTerm, "i");
 
-        const matchSearch = Object.values(company).some((value) =>
+        const matchSearch = Object.values(prospect).some((value) =>
           searchRegex.test(value.toString())
         );
 
         const matchFilters =
-          (!filters.name || company.name === filters.name) &&
-          (!filters.email || company.email === filters.email) &&
-          (!filters.website || company.website === filters.website) &&
+          (!filters.firstName || prospect.firstName === filters.firstName) &&
+          // (!filters.lastName || prospect.lastName === filters.lastName) &&
+          (!filters.email || prospect.lastName === filters.email) &&
+          (!filters.whatsapp || prospect.lastName === filters.whatsapp) &&
           (!filters.created_at[0] ||
-            ((dayjs(company.created_at).isAfter(filters.created_at[0], "day") ||
-              dayjs(company.created_at).isSame(filters.created_at[0], "day")) &&
-              (dayjs(company.created_at).isBefore(
+            ((dayjs(prospect.created_at).isAfter(
+              filters.created_at[0],
+              "day"
+            ) ||
+              dayjs(prospect.created_at).isSame(
+                filters.created_at[0],
+                "day"
+              )) &&
+              (dayjs(prospect.created_at).isBefore(
                 filters.created_at[1],
                 "day"
               ) ||
-                dayjs(company.created_at).isSame(
+                dayjs(prospect.created_at).isSame(
                   filters.created_at[1],
                   "day"
                 ))));
 
         return matchSearch && matchFilters;
       });
+      console.log(filteredBusiness);
       detectarTotalPages(filteredBusiness);
       const objetosOrdenados = filteredBusiness.sort((a, b) =>
         dayjs(b.fecha_created).isAfter(dayjs(a.fecha_created)) ? 1 : -1
@@ -141,8 +164,6 @@ const Prospects = () => {
       );
 
       setVisibleProspects(paginated);
-    } else {
-      setSearchTerm(bol);
     }
   };
 
@@ -178,8 +199,82 @@ const Prospects = () => {
   useEffect(() => {
     applyFilters(); // Aplicar filtro inicialmente
   }, [filterProspects, currentPage, itemsPerPage, searchTerm]);
+  const verifyStatus = (status) => {
+    switch (status) {
+      case "creado":
+        return (
+          <div className="max-w-max px-3 py-2 text-sm font-bold rounded-full bg-green-600 text-white inline-bloc text-nowrap">
+            Creado
+          </div>
+        );
+        break;
+      case "register_chat":
+        return (
+          <div className="max-w-max px-3 py-2 text-sm font-bold rounded-full bg-green-600 text-white inline-bloc text-nowrap">
+            RegistradoChat
+          </div>
+        );
+        break;
+    }
+  };
 
-  const handleDeleteProspects = async (id) => {
+  const handleCreateChange = (key, value) => {
+    setProspectCreate((prev) => {
+      const newProspect = { ...prev, [key]: value };
+
+      return newProspect;
+    });
+  };
+
+  const createProspect = async (newUser) => {
+    const token = auth.token;
+
+    try {
+      const response = await axios.post(`${apiUrl}/prospects`, newUser, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      return response.data; // Simplemente devuelve los datos
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Lanza el error para que pueda ser capturado en el llamado
+    }
+  };
+  const handleOkCreate = async () => {
+    setLoadingCreate(true);
+
+    const newProspect = { ...prospectCreate };
+    try {
+      const userData = await createProspect(newProspect);
+      console.log(userData);
+
+      if (userData.status === "success") {
+        message.success("Se creo correctamente al prospecto");
+        await buscar_prospects();
+        handleCancelCreate();
+      } else {
+        message.error("Ocurrio un error al crear al prospecto");
+        setLoadingCreate(false);
+      }
+    } catch (error) {
+      message.error("Ocurrió un error durante la creación del prospecto");
+    } finally {
+      setLoadingCreate(false);
+    }
+  };
+  const handleCancelCreate = () => {
+    setProspectCreate({
+      first_name: "",
+      last_name: "",
+      email: "",
+      whatsapp: "",
+    });
+    setIsModalOpenCreate(false);
+  };
+  const handleEliminarProspects = async (id) => {
     console.log(id);
     // let propiedad_id = id;
     // try {
@@ -206,58 +301,62 @@ const Prospects = () => {
               Loading
             </div>
           ) : null}
-          <div className="w-full mb-4">
-            <div className="grid grid-cols-3 gap-2">
-              <div className="w-full flex flex-col items-center">
-                <span
-                  className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
-                    nowStep >= 1
-                      ? "bg-dark-purple text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  1
-                </span>
-                <span>Datos de Prospects</span>
+          <div className="w-full">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="">
+                <label htmlFor="" className="w-full">
+                  Nombres
+                </label>
+                <input
+                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
+                  type="text"
+                  onChange={(e) =>
+                    handleCreateChange("first_name", e.target.value)
+                  }
+                />
               </div>
-              <div className="flex flex-col items-center">
-                <div className="w-full flex items-center">
-                  <div
-                    className={`w-full h-[2px] rounded-full ${
-                      nowStep >= 2 ? "bg-dark-purple" : "bg-gray-200"
-                    }`}
-                  ></div>
-                  <div className="w-full flex flex-col items-center">
-                    <span
-                      className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
-                        nowStep >= 2
-                          ? "bg-dark-purple text-white"
-                          : "bg-gray-200 text-gray-800"
-                      }`}
-                    >
-                      2
-                    </span>
-                  </div>
-                  <div
-                    className={`w-full h-[2px] rounded-full ${
-                      nowStep >= 2 ? "bg-dark-purple" : "bg-gray-200"
-                    }`}
-                  ></div>
-                </div>
-                <span>Registrar Usuario</span>
+              <div className="">
+                <label htmlFor="" className="w-full">
+                  Apellidos
+                </label>
+                <input
+                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
+                  type="text"
+                  onChange={(e) =>
+                    handleCreateChange("last_name", e.target.value)
+                  }
+                />
               </div>
-              <div className="w-full flex flex-col items-center">
-                <span
-                  className={`w-6 h-6 text-center text-xs rounded-full p-1 inline-block ${
-                    nowStep === 3
-                      ? "bg-dark-purple text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  3
-                </span>
-                <span>Selecciona el plan</span>
+              <div className="">
+                <label htmlFor="" className="w-full">
+                  Email
+                </label>
+                <input
+                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
+                  type="text"
+                  onChange={(e) => handleCreateChange("email", e.target.value)}
+                />
               </div>
+              <div className="">
+                <label htmlFor="" className="w-full">
+                  Whatsapp
+                </label>
+                <input
+                  className="w-full px-3 py-2 rounded bg-gray-100 text-sm"
+                  type="text"
+                  onChange={(e) =>
+                    handleCreateChange("whatsapp", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+            <div className="footerForm mt-4">
+              <button
+                className="px-3 py-2 bg-dark-purple text-white rounded"
+                onClick={() => handleOkCreate()}
+              >
+                Registrar
+              </button>
             </div>
           </div>
         </div>
@@ -341,56 +440,88 @@ const Prospects = () => {
         >
           <thead>
             <tr>
-              <td align="center">Logo</td>
-              <td>Name </td>
-              <td>Admin </td>
-              <td>Plan </td>
-              <td>Estado </td>
-              <td>Renovacion </td>
+              <td>Nombres </td>
+              <td>email </td>
+              <td>Whatsapp </td>
+              <td>Fecha creación</td>
+              <td>Estado</td>
               <td className="ajustes-tabla-celda">Acciones</td>
             </tr>
           </thead>
           <tbody>
-          {visibleEmpresas.length > 0 &&
-  visibleEmpresas.map((item, index) => {
-    // Validar que `item` tenga las propiedades necesarias
-    const hasAdmin = item?.admin;
-    const hasSubscription = hasAdmin && item.admin.subscriptions?.[0];
-    const hasPlan = hasSubscription && item.admin.subscriptions[0].plan;
-
-    return (
-      <tr className="" key={index}>
-        <td>
-          <div
-            className="w-8 h-8 object-contain"
-            style={{
-              backgroundImage: `url('${item.logo || ""}')`,
-              backgroundPosition: "center",
-              backgroundSize: "contain",
-            }}
-          ></div>
-        </td>
-        <td>{item.name || "N/A"}</td>
-        <td>
-          <b>{hasAdmin ? item.admin.name : "Sin nombre"}</b> <br />
-          {hasAdmin ? item.admin.email : "Sin email"}
-        </td>
-        <td>
-          {hasPlan ? hasPlan.name : "Sin plan"} <br />
-          {hasPlan ? hasPlan.price : "Sin precio"}
-        </td>
-        <td>{hasSubscription ? item.admin.subscriptions[0].status : "N/A"}</td>
-        <td>
-          {hasSubscription
-            ? dayjs(item.admin.subscriptions[0].endDate)
-                .locale("es")
-                .format("DD [de] MMMM [del] YYYY")
-            : "Sin fecha"}
-        </td>
-        ...
-      </tr>
-    );
-  })}
+            {visibleProspects.length > 0 &&
+              visibleProspects.map((item, index) => {
+                return (
+                  <tr className="" key={index}>
+                    <td>
+                      <b>{item.firstName + " " + item.lastName || "N/A"}</b>
+                    </td>
+                    <td>{item.email}</td>
+                    <td>{item.whatsapp}</td>
+                    <td>
+                      {dayjs(item.createdAt)
+                        .locale("es")
+                        .format("DD MMMM YYYY HH:mm:ss")}
+                    </td>
+                    <td>{verifyStatus(item.status)}</td>
+                    <td className="ajustes-tabla-celda">
+                      <div className="ajustes-tabla-celda-item px-4">
+                        <Dropdown
+                          className="text-sm text-gray-500"
+                          placement="bottomRight"
+                          menu={{
+                            items: [
+                              {
+                                label: (
+                                  <Link
+                                    to={`/prospects/edit/${item.id}`}
+                                    className="pr-6 rounded flex items-center gap-2 text-sm text-gray-500"
+                                  >
+                                    <FaEdit /> Editar info
+                                  </Link>
+                                ),
+                                key: 1,
+                              },
+                              {
+                                label: (
+                                  <button
+                                    onClick={() => {
+                                      Modal.confirm({
+                                        title:
+                                          "¿Está seguro de eliminar al prospecto?",
+                                        content:
+                                          "Al eliminar el prospecto, se eliminarán los datos relacionados como: respuestas de prefuntas",
+                                        onOk: () =>
+                                          handleEliminarProspects(item.id),
+                                        okText: "Eliminar",
+                                        cancelText: "Cancelar",
+                                      });
+                                    }}
+                                    className="w-full rounded flex items-center gap-2 text-sm text-red-500"
+                                  >
+                                    <FaTrash /> Eliminar
+                                  </button>
+                                ),
+                                key: 2,
+                              },
+                            ],
+                          }}
+                          trigger={["click"]}
+                        >
+                          <div
+                            className="text-xs w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-all duration-300"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Space>
+                              <FaEllipsisV />
+                            </Space>
+                          </div>
+                        </Dropdown>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
