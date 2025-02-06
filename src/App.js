@@ -28,7 +28,7 @@ import CasosEstudio from "./pages/superadmin/CasosEstudio";
 import Plan from "./pages/admin/Plan";
 import LlenarEncuestaProspect from "./pages/superadmin/LlenarEncuestaProspect";
 import Recomendaciones from "./pages/superadmin/Recomendaciones";
-import Exam from "./pages/Exam";
+import Examen from "./pages/Examen";
 
 function App() {
   return (
@@ -40,7 +40,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/encuestas/:id" element={<LlenarEncuestaProspect />} />
           <Route path="/recomendaciones/:id" element={<Recomendaciones />} />
-          <Route path="/examen/:candidate_id" element={<Exam />} />
+          <Route path="/examen/:candidate_id" element={<Examen />} />
 
           {/* RUTAS PARA USUARIO ADMIN */}
           <Route

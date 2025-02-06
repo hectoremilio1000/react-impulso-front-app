@@ -46,7 +46,7 @@ const Candidatos = () => {
 
   const iniciarExamen = (candidate_id, status, puesto) => {
     try {
-      navigate(`/examen/${candidate_id}?intentoId=${1}&puesto=${puesto}`);
+      navigate(`/examen/${candidate_id}?puesto=${puesto}`);
     } catch (error) {
       console.error("Error al cambiar estado:", error);
     }
