@@ -5,6 +5,31 @@ import "tailwindcss/tailwind.css";
 import axios from "axios";
 import { useAuth } from "../../../components/AuthContext";
 
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+} from "chart.js";
+import { Radar, Bar } from "react-chartjs-2";
+
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
+);
 const { Option } = Select;
 
 const initialData = [
@@ -50,6 +75,110 @@ const Candidatos = () => {
     } catch (error) {
       console.error("Error al cambiar estado:", error);
     }
+  };
+
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrlFiles = process.env.REACT_APP_API_URL_FILES;
+  const [candidates, setCandidates] = useState([]);
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
+  const [isModalOpenResults, setIsModalOpenResults] = useState(false);
+  const [resultActive, setResultActive] = useState(null);
+  const [candidateCreate, setCandidateCreate] = useState({
+    position: "Mesero",
+    name: "",
+    whatsapp: "",
+    email: "",
+    cv_path: "1234", //curriculum vitae del candidate
+    reference1Company: "",
+    reference1Position: "",
+    reference1Name: "",
+    reference1Timeworked: "",
+    reference1Whatsapp: "",
+    reference2Company: "",
+    reference2Position: "",
+    reference2Name: "",
+    reference2Timeworked: "",
+    reference2Whatsapp: "",
+  });
+  const [resultadosByCandidate, setResultadosByCandidate] = useState([]);
+  const [candidateIdeal, setCandidateIdeal] = useState(null);
+  const [selectedResult, setSelectedResult] = useState(null);
+  const handleCandidateResult = async (id, puesto) => {
+    try {
+      // resultados del candidato con id =?
+      const response = await axios.get(`${apiUrl}/getResultsCandidate/${id}`);
+      // resultados del candidato con id =?
+      const responseCandidateIdeal = await axios.get(
+        `${apiUrl}/getCandidateIdealByPuesto/${puesto}`
+      );
+      const data = response.data;
+      const dataCandidateIdeal = responseCandidateIdeal.data.data;
+      if (data.status === "success") {
+        setResultadosByCandidate(data.data);
+        setCandidateIdeal(dataCandidateIdeal[0]);
+
+        console.log(dataCandidateIdeal);
+        setIsModalOpenResults(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // Función para obtener los datos del gráfico
+  const getChartData = (candidateResult, idealResult) => {
+    const labels = [
+      "Empatía",
+      "Conocimientos",
+      "Integridad",
+      "Ética",
+      "Bondad",
+      "Optimismo",
+      "Curiosidad",
+      "Autoconciencia",
+    ];
+
+    const candidateScores = [
+      parseFloat(candidateResult.puntajeEmpatia),
+      parseFloat(candidateResult.puntajeConocimientos),
+      parseFloat(candidateResult.puntajeIntegridad),
+      parseFloat(candidateResult.puntajeEtica),
+      parseFloat(candidateResult.puntajeBondad),
+      parseFloat(candidateResult.puntajeOptimismo),
+      parseFloat(candidateResult.puntajeCuriosidad),
+      parseFloat(candidateResult.puntajeAutoconciencia),
+    ];
+
+    const idealScores = [
+      parseFloat(idealResult.puntajeEmpatia),
+      parseFloat(idealResult.puntajeConocimientos),
+      parseFloat(idealResult.puntajeIntegridad),
+      parseFloat(idealResult.puntajeEtica),
+      parseFloat(idealResult.puntajeBondad),
+      parseFloat(idealResult.puntajeOptimismo),
+      parseFloat(idealResult.puntajeCuriosidad),
+      parseFloat(idealResult.puntajeAutoconciencia),
+    ];
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Candidato",
+          data: candidateScores,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+        },
+        {
+          label: "Ideal",
+          data: idealScores,
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          borderColor: "rgba(255, 99, 132, 1)",
+          borderWidth: 2,
+        },
+      ],
+    };
   };
 
   const columns = [
@@ -187,11 +316,36 @@ const Candidatos = () => {
                 Descartar
               </Button>
             </>
-          ) : record.status === "iniciar examen" ? (
+          ) : record.status === "Start Exam" ? (
             <>
               <Link to={`${record.id}/examen`}>
                 <Button type="primary">Abrir Examen</Button>
               </Link>
+              <Button
+                type="default"
+                // onClick={() => updateStatus(record.id, "aprobado")}
+              >
+                Aprobar
+              </Button>
+              <Button
+                type="danger"
+                // onClick={() => updateStatus(record.id, "descartar")}
+              >
+                Descartar
+              </Button>
+            </>
+          ) : record.status === "Exam Completed" ? (
+            <>
+              <div
+                className="bg-dark-purple cursor-pointer text-white font-bold text-sm px-3 py-2 rounded"
+                type="default"
+                // onClick={() => updateStatusCandidate(record.id, "Approved")}
+                onClick={() =>
+                  handleCandidateResult(record.id, record.position)
+                }
+              >
+                Resultados
+              </div>
               <Button
                 type="default"
                 // onClick={() => updateStatus(record.id, "aprobado")}
@@ -217,28 +371,6 @@ const Candidatos = () => {
       ),
     },
   ];
-  const apiUrl = process.env.REACT_APP_API_URL;
-  const apiUrlFiles = process.env.REACT_APP_API_URL_FILES;
-  const [candidates, setCandidates] = useState([]);
-  const [loadingCreate, setLoadingCreate] = useState(false);
-  const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
-  const [candidateCreate, setCandidateCreate] = useState({
-    position: "Mesero",
-    name: "",
-    whatsapp: "",
-    email: "",
-    cv_path: "1234", //curriculum vitae del candidate
-    reference1Company: "",
-    reference1Position: "",
-    reference1Name: "",
-    reference1Timeworked: "",
-    reference1Whatsapp: "",
-    reference2Company: "",
-    reference2Position: "",
-    reference2Name: "",
-    reference2Timeworked: "",
-    reference2Whatsapp: "",
-  });
 
   const abrirModalCreate = (e) => {
     e.stopPropagation();
@@ -381,6 +513,24 @@ const Candidatos = () => {
     });
 
     setIsModalOpenCreate(false);
+  };
+  const handleCancelResults = () => {
+    setIsModalOpenResults(false);
+  };
+
+  const updateStatusCandidate = async (id, status) => {
+    try {
+      const response = await axios.post(`${apiUrl}/updateStatusCandidate`, {
+        candidateId: id,
+        status: status,
+      });
+      const data = response.data;
+      if (data.status === "success") {
+        console.log(response);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -614,6 +764,41 @@ const Candidatos = () => {
               Registrar
             </button>
           </div>
+        </div>
+      </Modal>
+      <Modal
+        footer={null}
+        title="Resultados"
+        open={isModalOpenResults}
+        onCancel={handleCancelResults}
+      >
+        <div>
+          <h2>Resultados del Candidato</h2>
+          <div className="flex items-center gap-4">
+            {resultadosByCandidate.map((result, index) => (
+              <button
+                key={result.id}
+                onClick={() => setSelectedResult(result)}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#007bff",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Examen {index + 1}
+              </button>
+            ))}
+          </div>
+
+          {selectedResult && (
+            <div>
+              <h3>Comparativa de Examen {selectedResult.id}</h3>
+              <Radar data={getChartData(selectedResult, candidateIdeal)} />
+            </div>
+          )}
         </div>
       </Modal>
 

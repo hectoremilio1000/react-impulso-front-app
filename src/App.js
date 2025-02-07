@@ -29,6 +29,7 @@ import Plan from "./pages/admin/Plan";
 import LlenarEncuestaProspect from "./pages/superadmin/LlenarEncuestaProspect";
 import Recomendaciones from "./pages/superadmin/Recomendaciones";
 import Examen from "./pages/Examen";
+import ThanksCandidate from "./pages/ThanksCandidate";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="/encuestas/:id" element={<LlenarEncuestaProspect />} />
           <Route path="/recomendaciones/:id" element={<Recomendaciones />} />
           <Route path="/examen/:candidate_id" element={<Examen />} />
+          <Route path="/thanks-candidate" element={<ThanksCandidate />} />
 
           {/* RUTAS PARA USUARIO ADMIN */}
           <Route

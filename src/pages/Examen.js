@@ -1,9 +1,10 @@
 import { message } from "antd";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 const Examen = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { candidate_id } = useParams();
   const [intentoId, setIntentoId] = useState(1);
@@ -169,6 +170,7 @@ const Examen = () => {
           );
           console.log(response_results);
           message.success("Se envio correctamente las respuestas");
+          navigate("/thanks-candidate");
         }
       } catch (error) {
         console.log(error);
